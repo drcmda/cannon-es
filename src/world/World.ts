@@ -408,7 +408,10 @@ export class World extends EventTarget {
         substeps++
       }
 
-      const t = (this.accumulator % dt) / dt
+      // prevent the accumulator to build up delay to catch up. The logic being: if the step did not catch up at this frame, it is unlikely to catch up in the next one. Even if it does, it will result in a speed up simulation which is arguably worse that staying behind the real time.
+      this.accumulator = Math.max(this.accumulator, dt)
+
+      const t = this.accumulator / dt
       for (let j = 0; j !== this.bodies.length; j++) {
         const b = this.bodies[j]
         b.previousPosition.lerp(b.position, t, b.interpolatedPosition)
