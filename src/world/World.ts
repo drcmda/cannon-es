@@ -388,6 +388,7 @@ export class World extends EventTarget {
    *     world.step(1/60);
    *
    * @see http://bulletphysics.org/mediawiki-1.5.8/index.php/Stepping_The_World
+   * @see https://gafferongames.com/post/fix_your_timestep/
    */
   step(dt: number, timeSinceLastCalled = 0, maxSubSteps = 10): void {
     if (timeSinceLastCalled === 0) {
