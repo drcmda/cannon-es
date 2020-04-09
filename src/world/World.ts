@@ -395,9 +395,6 @@ export class World extends EventTarget {
       // Fixed, simple stepping
 
       this.internalStep(dt)
-
-      // Increment time
-      this.time += dt
     } else {
       this.accumulator += timeSinceLastCalled
       let substeps = 0
@@ -418,7 +415,6 @@ export class World extends EventTarget {
         b.previousQuaternion.slerp(b.quaternion, t, b.interpolatedQuaternion)
         b.previousQuaternion.normalize()
       }
-      this.time += timeSinceLastCalled
     }
   }
 
