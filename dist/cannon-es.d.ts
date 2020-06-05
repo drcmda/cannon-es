@@ -1480,8 +1480,16 @@ declare module "objects/SPHSystem" {
 }
 declare module "shapes/Cylinder" {
     import { ConvexPolyhedron } from "shapes/ConvexPolyhedron";
+    import { Vec3 } from "math/Vec3";
+    type Vec3Factory = (x: number, y: number, z: number) => Vec3;
+    export enum Axis {
+        X = 0,
+        Y = 1,
+        Z = 2
+    }
     export class Cylinder extends ConvexPolyhedron {
-        constructor(radiusTop: number, radiusBottom: number, height: number, numSegments: number);
+        static vectorFactories: Array<Vec3Factory>;
+        constructor(radiusTop: number, radiusBottom: number, height: number, numSegments: number, primaryAxis?: Axis);
     }
 }
 declare module "solver/SplitSolver" {

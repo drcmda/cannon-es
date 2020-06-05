@@ -8335,17 +8335,29 @@ var SPHSystem_update_u = new Vec3();
  * @class Cylinder
  * @constructor
  * @extends ConvexPolyhedron
- * @author schteppe / https://github.com/schteppe
+ * @author schteppe / https://github.com/schteppe (original author)
+ * @author ianpurvis / https://github.com/ianpurvis
  * @param {Number} radiusTop
  * @param {Number} radiusBottom
  * @param {Number} height
  * @param {Number} numSegments The number of segments to build the cylinder out of
+ * @param {Axis} [primaryAxis=Z]
  */
+
+(function (Axis) {
+  Axis[Axis["X"] = 0] = "X";
+  Axis[Axis["Y"] = 1] = "Y";
+  Axis[Axis["Z"] = 2] = "Z";
+})(exports.Axis || (exports.Axis = {}));
 
 var Cylinder = /*#__PURE__*/function (_ConvexPolyhedron) {
   _inheritsLoose(Cylinder, _ConvexPolyhedron);
 
-  function Cylinder(radiusTop, radiusBottom, height, numSegments) {
+  function Cylinder(radiusTop, radiusBottom, height, numSegments, primaryAxis) {
+    if (primaryAxis === void 0) {
+      primaryAxis = exports.Axis.Z;
+    }
+
     var N = numSegments;
     var vertices = [];
     var axes = [];
@@ -8353,12 +8365,13 @@ var Cylinder = /*#__PURE__*/function (_ConvexPolyhedron) {
     var bottomface = [];
     var topface = [];
     var cos = Math.cos;
-    var sin = Math.sin; // First bottom point
+    var sin = Math.sin;
+    var makeVec3 = Cylinder.vectorFactories[primaryAxis]; // First bottom point
 
-    vertices.push(new Vec3(radiusBottom * cos(0), radiusBottom * sin(0), -height * 0.5));
+    vertices.push(makeVec3(radiusBottom * cos(0), radiusBottom * sin(0), -height * 0.5));
     bottomface.push(0); // First top point
 
-    vertices.push(new Vec3(radiusTop * cos(0), radiusTop * sin(0), height * 0.5));
+    vertices.push(makeVec3(radiusTop * cos(0), radiusTop * sin(0), height * 0.5));
     topface.push(1);
 
     for (var i = 0; i < N; i++) {
@@ -8367,10 +8380,10 @@ var Cylinder = /*#__PURE__*/function (_ConvexPolyhedron) {
 
       if (i < N - 1) {
         // Bottom
-        vertices.push(new Vec3(radiusBottom * cos(theta), radiusBottom * sin(theta), -height * 0.5));
+        vertices.push(makeVec3(radiusBottom * cos(theta), radiusBottom * sin(theta), -height * 0.5));
         bottomface.push(2 * i + 2); // Top
 
-        vertices.push(new Vec3(radiusTop * cos(theta), radiusTop * sin(theta), height * 0.5));
+        vertices.push(makeVec3(radiusTop * cos(theta), radiusTop * sin(theta), height * 0.5));
         topface.push(2 * i + 3); // Face
 
         faces.push([2 * i + 2, 2 * i + 3, 2 * i + 1, 2 * i]);
@@ -8380,12 +8393,12 @@ var Cylinder = /*#__PURE__*/function (_ConvexPolyhedron) {
 
 
       if (N % 2 === 1 || i < N / 2) {
-        axes.push(new Vec3(cos(thetaN), sin(thetaN), 0));
+        axes.push(makeVec3(cos(thetaN), sin(thetaN), 0));
       }
     }
 
     faces.push(topface);
-    axes.push(new Vec3(0, 0, 1)); // Reorder bottom face
+    axes.push(makeVec3(0, 0, 1)); // Reorder bottom face
 
     var temp = [];
 
@@ -8403,6 +8416,21 @@ var Cylinder = /*#__PURE__*/function (_ConvexPolyhedron) {
 
   return Cylinder;
 }(ConvexPolyhedron);
+/**
+ * Vector factories for creating axis-oriented cylinders
+ * @const vectorFactories
+ */
+
+Cylinder.vectorFactories = [function (x, y, z) {
+  return new Vec3(z, y, -x);
+}, // Rotate 90deg CCW on y-axis
+function (x, y, z) {
+  return new Vec3(x, z, -y);
+}, // Rotate 90deg CCW on x-axis
+function (x, y, z) {
+  return new Vec3(x, y, z);
+} // Default, no rotation
+];
 
 /**
  * Particle shape.

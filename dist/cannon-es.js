@@ -7743,18 +7743,39 @@ const SPHSystem_update_r_vec = new Vec3();
 const SPHSystem_update_u = new Vec3();
 
 /**
+ * Factory function which creates a new Vec3 object
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} z
+ * @return {Vec3}
+ */
+
+/**
+ * Orientation axis for cylinder creation
+ * @enum {number}
+ */
+let Axis;
+/**
  * @class Cylinder
  * @constructor
  * @extends ConvexPolyhedron
- * @author schteppe / https://github.com/schteppe
+ * @author schteppe / https://github.com/schteppe (original author)
+ * @author ianpurvis / https://github.com/ianpurvis
  * @param {Number} radiusTop
  * @param {Number} radiusBottom
  * @param {Number} height
  * @param {Number} numSegments The number of segments to build the cylinder out of
+ * @param {Axis} [primaryAxis=Z]
  */
 
+(function (Axis) {
+  Axis[Axis["X"] = 0] = "X";
+  Axis[Axis["Y"] = 1] = "Y";
+  Axis[Axis["Z"] = 2] = "Z";
+})(Axis || (Axis = {}));
+
 class Cylinder extends ConvexPolyhedron {
-  constructor(radiusTop, radiusBottom, height, numSegments) {
+  constructor(radiusTop, radiusBottom, height, numSegments, primaryAxis = Axis.Z) {
     const N = numSegments;
     const vertices = [];
     const axes = [];
@@ -7762,12 +7783,13 @@ class Cylinder extends ConvexPolyhedron {
     const bottomface = [];
     const topface = [];
     const cos = Math.cos;
-    const sin = Math.sin; // First bottom point
+    const sin = Math.sin;
+    const makeVec3 = Cylinder.vectorFactories[primaryAxis]; // First bottom point
 
-    vertices.push(new Vec3(radiusBottom * cos(0), radiusBottom * sin(0), -height * 0.5));
+    vertices.push(makeVec3(radiusBottom * cos(0), radiusBottom * sin(0), -height * 0.5));
     bottomface.push(0); // First top point
 
-    vertices.push(new Vec3(radiusTop * cos(0), radiusTop * sin(0), height * 0.5));
+    vertices.push(makeVec3(radiusTop * cos(0), radiusTop * sin(0), height * 0.5));
     topface.push(1);
 
     for (let i = 0; i < N; i++) {
@@ -7776,10 +7798,10 @@ class Cylinder extends ConvexPolyhedron {
 
       if (i < N - 1) {
         // Bottom
-        vertices.push(new Vec3(radiusBottom * cos(theta), radiusBottom * sin(theta), -height * 0.5));
+        vertices.push(makeVec3(radiusBottom * cos(theta), radiusBottom * sin(theta), -height * 0.5));
         bottomface.push(2 * i + 2); // Top
 
-        vertices.push(new Vec3(radiusTop * cos(theta), radiusTop * sin(theta), height * 0.5));
+        vertices.push(makeVec3(radiusTop * cos(theta), radiusTop * sin(theta), height * 0.5));
         topface.push(2 * i + 3); // Face
 
         faces.push([2 * i + 2, 2 * i + 3, 2 * i + 1, 2 * i]);
@@ -7789,12 +7811,12 @@ class Cylinder extends ConvexPolyhedron {
 
 
       if (N % 2 === 1 || i < N / 2) {
-        axes.push(new Vec3(cos(thetaN), sin(thetaN), 0));
+        axes.push(makeVec3(cos(thetaN), sin(thetaN), 0));
       }
     }
 
     faces.push(topface);
-    axes.push(new Vec3(0, 0, 1)); // Reorder bottom face
+    axes.push(makeVec3(0, 0, 1)); // Reorder bottom face
 
     const temp = [];
 
@@ -7811,6 +7833,15 @@ class Cylinder extends ConvexPolyhedron {
   }
 
 }
+/**
+ * Vector factories for creating axis-oriented cylinders
+ * @const vectorFactories
+ */
+
+Cylinder.vectorFactories = [(x, y, z) => new Vec3(z, y, -x), // Rotate 90deg CCW on y-axis
+(x, y, z) => new Vec3(x, z, -y), // Rotate 90deg CCW on x-axis
+(x, y, z) => new Vec3(x, y, z) // Default, no rotation
+];
 
 /**
  * Particle shape.
@@ -12321,4 +12352,4 @@ World.prototype.emitContactEvents = (() => {
   };
 })();
 
-export { AABB, ArrayCollisionMatrix, BODY_SLEEP_STATES, BODY_TYPES, Body, Box, Broadphase, COLLISION_TYPES, ConeTwistConstraint, Constraint, ContactEquation, ContactMaterial, ConvexPolyhedron, Cylinder, DistanceConstraint, Equation, EventTarget, FrictionEquation, GSSolver, GridBroadphase, Heightfield, HingeConstraint, JacobianElement, LockConstraint, Mat3, Material, NaiveBroadphase, Narrowphase, ObjectCollisionMatrix, Particle, Plane, PointToPointConstraint, Pool, Quaternion, RAY_MODES, Ray, RaycastResult, RaycastVehicle, RigidVehicle, RotationalEquation, RotationalMotorEquation, SAPBroadphase, SHAPE_TYPES, SPHSystem, Shape, Solver, Sphere, SplitSolver, Spring, Transform, Trimesh, Vec3, Vec3Pool, World };
+export { AABB, ArrayCollisionMatrix, Axis, BODY_SLEEP_STATES, BODY_TYPES, Body, Box, Broadphase, COLLISION_TYPES, ConeTwistConstraint, Constraint, ContactEquation, ContactMaterial, ConvexPolyhedron, Cylinder, DistanceConstraint, Equation, EventTarget, FrictionEquation, GSSolver, GridBroadphase, Heightfield, HingeConstraint, JacobianElement, LockConstraint, Mat3, Material, NaiveBroadphase, Narrowphase, ObjectCollisionMatrix, Particle, Plane, PointToPointConstraint, Pool, Quaternion, RAY_MODES, Ray, RaycastResult, RaycastVehicle, RigidVehicle, RotationalEquation, RotationalMotorEquation, SAPBroadphase, SHAPE_TYPES, SPHSystem, Shape, Solver, Sphere, SplitSolver, Spring, Transform, Trimesh, Vec3, Vec3Pool, World };
