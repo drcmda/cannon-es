@@ -7765,7 +7765,7 @@ let Axis;
  * @param {Number} radiusBottom
  * @param {Number} height
  * @param {Number} numSegments The number of segments to build the cylinder out of
- * @param {Axis} [primaryAxis=Z]
+ * @param {Axis} [primaryAxis=Y]
  */
 
 (function (Axis) {
@@ -7775,7 +7775,7 @@ let Axis;
 })(Axis || (Axis = {}));
 
 class Cylinder extends ConvexPolyhedron {
-  constructor(radiusTop, radiusBottom, height, numSegments, primaryAxis = Axis.Z) {
+  constructor(radiusTop, radiusBottom, height, numSegments, primaryAxis = Axis.Y) {
     const N = numSegments;
     const vertices = [];
     const axes = [];

@@ -8341,7 +8341,7 @@ var SPHSystem_update_u = new Vec3();
  * @param {Number} radiusBottom
  * @param {Number} height
  * @param {Number} numSegments The number of segments to build the cylinder out of
- * @param {Axis} [primaryAxis=Z]
+ * @param {Axis} [primaryAxis=Y]
  */
 
 (function (Axis) {
@@ -8355,7 +8355,7 @@ var Cylinder = /*#__PURE__*/function (_ConvexPolyhedron) {
 
   function Cylinder(radiusTop, radiusBottom, height, numSegments, primaryAxis) {
     if (primaryAxis === void 0) {
-      primaryAxis = exports.Axis.Z;
+      primaryAxis = exports.Axis.Y;
     }
 
     var N = numSegments;

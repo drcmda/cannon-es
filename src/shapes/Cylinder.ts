@@ -30,7 +30,7 @@ export enum Axis {
  * @param {Number} radiusBottom
  * @param {Number} height
  * @param {Number} numSegments The number of segments to build the cylinder out of
- * @param {Axis} [primaryAxis=Z]
+ * @param {Axis} [primaryAxis=Y]
  */
 export class Cylinder extends ConvexPolyhedron {
   static vectorFactories: Array<Vec3Factory>
@@ -40,7 +40,7 @@ export class Cylinder extends ConvexPolyhedron {
     radiusBottom: number,
     height: number,
     numSegments: number,
-    primaryAxis: Axis = Axis.Z
+    primaryAxis: Axis = Axis.Y
   ) {
     const N = numSegments
     const vertices = []
