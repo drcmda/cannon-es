@@ -9127,7 +9127,7 @@ class Trimesh extends Shape {
         const n = this.vertices.length / 3,
             verts = this.vertices;
         const minx,miny,minz,maxx,maxy,maxz;
-          const v = tempWorldVertex;
+         const v = tempWorldVertex;
         for(let i=0; i<n; i++){
             this.getVertex(i, v);
             quat.vmult(v, v);
@@ -9137,12 +9137,12 @@ class Trimesh extends Shape {
             } else if(v.x > maxx || maxx===undefined){
                 maxx = v.x;
             }
-              if (v.y < miny || miny===undefined){
+             if (v.y < miny || miny===undefined){
                 miny = v.y;
             } else if(v.y > maxy || maxy===undefined){
                 maxy = v.y;
             }
-              if (v.z < minz || minz===undefined){
+             if (v.z < minz || minz===undefined){
                 minz = v.z;
             } else if(v.z > maxz || maxz===undefined){
                 maxz = v.z;
@@ -12198,7 +12198,7 @@ class World extends EventTarget {
 const tmpAABB1 = new AABB();
 const tmpRay$1 = new Ray(); // performance.now() fallback on Date.now()
 
-const performance = require('perf_hooks').performance || {};
+const performance = typeof window != 'undefined' && require('perf_hooks').performance || {};
 
 if (!performance.now) {
   let nowOffset = Date.now();
