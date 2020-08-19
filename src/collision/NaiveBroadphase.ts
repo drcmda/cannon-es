@@ -34,7 +34,7 @@ export class NaiveBroadphase extends Broadphase {
         bi = bodies[i]
         bj = bodies[j]
 
-        if (!this.needBroadphaseCollision(bi, bj)) {
+        if (!Broadphase.needBroadphaseCollision(bi, bj)) {
           continue
         }
 

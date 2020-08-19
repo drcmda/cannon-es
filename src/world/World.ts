@@ -807,8 +807,6 @@ export class World extends EventTarget {
 }
 
 // Temp stuff
-const tmpAABB1 = new AABB()
-const tmpArray1 = []
 const tmpRay = new Ray()
 
 // performance.now() fallback on Date.now()
@@ -821,8 +819,6 @@ if (!performance.now) {
   }
   performance.now = () => Date.now() - nowOffset
 }
-
-const step_tmp1 = new Vec3()
 
 // Dispatched after the world has stepped forward in time.
 // Reusable event objects to save memory.

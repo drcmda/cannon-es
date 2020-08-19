@@ -101,7 +101,7 @@ export class SAPBroadphase extends Broadphase {
       for (j = i + 1; j < N; j++) {
         const bj = bodies[j]
 
-        if (!this.needBroadphaseCollision(bi, bj)) {
+        if (!Broadphase.needBroadphaseCollision(bi, bj)) {
           continue
         }
 

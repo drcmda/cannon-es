@@ -315,12 +315,12 @@ export class Heightfield extends Shape {
     }
   }
 
-  getCacheConvexTrianglePillarKey(xi: number, yi: number, getUpperTriangle: boolean): string {
+  static getCacheConvexTrianglePillarKey(xi: number, yi: number, getUpperTriangle: boolean): string {
     return `${xi}_${yi}_${getUpperTriangle ? 1 : 0}`
   }
 
   getCachedConvexTrianglePillar(xi: number, yi: number, getUpperTriangle: boolean): HeightfieldPillar {
-    return this._cachedPillars[this.getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle)]
+    return this._cachedPillars[Heightfield.getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle)]
   }
 
   setCachedConvexTrianglePillar(
@@ -330,14 +330,14 @@ export class Heightfield extends Shape {
     convex: ConvexPolyhedron,
     offset: Vec3
   ): void {
-    this._cachedPillars[this.getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle)] = {
+    this._cachedPillars[Heightfield.getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle)] = {
       convex,
       offset,
     }
   }
 
   clearCachedConvexTrianglePillar(xi: number, yi: number, getUpperTriangle: boolean): void {
-    delete this._cachedPillars[this.getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle)]
+    delete this._cachedPillars[Heightfield.getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle)]
   }
 
   /**

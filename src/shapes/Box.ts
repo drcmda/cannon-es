@@ -15,8 +15,6 @@ export class Box extends Shape {
   halfExtents: Vec3
   convexPolyhedronRepresentation: ConvexPolyhedron // Used by the contact generator to make contacts with other convex polyhedra for example.
 
-  static calculateInertia: (halfExtents: Vec3, mass: number, target: Vec3) => void
-
   constructor(halfExtents: Vec3) {
     super({ type: Shape.types.BOX })
 
@@ -197,13 +195,13 @@ export class Box extends Shape {
     //     }
     // });
   }
-}
 
-Box.calculateInertia = (halfExtents: Vec3, mass: number, target: Vec3): void => {
-  const e = halfExtents
-  target.x = (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.z * 2 * e.z)
-  target.y = (1.0 / 12.0) * mass * (2 * e.x * 2 * e.x + 2 * e.z * 2 * e.z)
-  target.z = (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.x * 2 * e.x)
+  static calculateInertia(halfExtents: Vec3, mass: number, target: Vec3): void {
+    const e = halfExtents
+    target.x = (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.z * 2 * e.z)
+    target.y = (1.0 / 12.0) * mass * (2 * e.x * 2 * e.x + 2 * e.z * 2 * e.z)
+    target.z = (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.x * 2 * e.x)
+  }
 }
 
 const worldCornerTempPos = new Vec3()

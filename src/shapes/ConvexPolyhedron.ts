@@ -39,9 +39,6 @@ export class ConvexPolyhedron extends Shape {
   uniqueAxes: Vec3[] | null // If given, these locally defined, normalized axes are the only ones being checked when doing separating axis check.
   uniqueEdges: Vec3[]
 
-  static computeNormal: (va: Vec3, vb: Vec3, vc: Vec3, target: Vec3) => void
-  static project: (shape: ConvexPolyhedron, axis: Vec3, pos: Vec3, quat: Quaternion, result: number[]) => void
-
   constructor(
     props: {
       vertices?: Vec3[]
@@ -514,7 +511,7 @@ export class ConvexPolyhedron extends Shape {
       const planeEqWS = localPlaneEq - planeNormalWS.dot(posA)
 
       // Clip face against our constructed plane
-      this.clipFaceAgainstPlane(pVtxIn, pVtxOut, planeNormalWS, planeEqWS)
+      ConvexPolyhedron.clipFaceAgainstPlane(pVtxIn, pVtxOut, planeNormalWS, planeEqWS)
 
       // Throw away all clipped points, but save the remaining until next clip
       while (pVtxIn.length) {
@@ -557,13 +554,14 @@ export class ConvexPolyhedron extends Shape {
 
   /**
    * Clip a face in a hull against the back of a plane.
+   * @static
    * @method clipFaceAgainstPlane
    * @param {Array} inVertices
    * @param {Array} outVertices
    * @param {Vec3} planeNormal
    * @param {Number} planeConstant The constant in the mathematical plane equation
    */
-  clipFaceAgainstPlane(inVertices: Vec3[], outVertices: Vec3[], planeNormal: Vec3, planeConstant: number): Vec3[] {
+  static clipFaceAgainstPlane(inVertices: Vec3[], outVertices: Vec3[], planeNormal: Vec3, planeConstant: number): Vec3[] {
     let n_dot_first
     let n_dot_last
     const numVerts = inVertices.length
@@ -834,87 +832,87 @@ export class ConvexPolyhedron extends Shape {
     // If we got here, all dot products were of the same sign.
     return positiveResult ? 1 : -1
   }
-}
 
-/**
- * Get face normal given 3 vertices
- * @static
- * @method computeNormal
- * @param {Vec3} va
- * @param {Vec3} vb
- * @param {Vec3} vc
- * @param {Vec3} target
- */
-ConvexPolyhedron.computeNormal = (va: Vec3, vb: Vec3, vc: Vec3, target: Vec3): void => {
-  const cb = new Vec3()
-  const ab = new Vec3()
-  vb.vsub(va, ab)
-  vc.vsub(vb, cb)
-  cb.cross(ab, target)
-  if (!target.isZero()) {
-    target.normalize()
+  /**
+   * Get face normal given 3 vertices
+   * @static
+   * @method computeNormal
+   * @param {Vec3} va
+   * @param {Vec3} vb
+   * @param {Vec3} vc
+   * @param {Vec3} target
+   */
+  static computeNormal = (va: Vec3, vb: Vec3, vc: Vec3, target: Vec3): void => {
+    const cb = new Vec3()
+    const ab = new Vec3()
+    vb.vsub(va, ab)
+    vc.vsub(vb, cb)
+    cb.cross(ab, target)
+    if (!target.isZero()) {
+      target.normalize()
+    }
+  }
+
+  /**
+   * Get max and min dot product of a convex hull at position (pos,quat) projected onto an axis.
+   * Results are saved in the array maxmin.
+   * @static
+   * @method project
+   * @param {ConvexPolyhedron} hull
+   * @param {Vec3} axis
+   * @param {Vec3} pos
+   * @param {Quaternion} quat
+   * @param {array} result result[0] and result[1] will be set to maximum and minimum, respectively.
+   */
+  static project = (
+    shape: ConvexPolyhedron,
+    axis: Vec3,
+    pos: Vec3,
+    quat: Quaternion,
+    result: number[]
+  ): void => {
+    const n = shape.vertices.length
+    const localAxis = new Vec3()
+    let max = 0
+    let min = 0
+    const localOrigin = new Vec3()
+    const vs = shape.vertices
+
+    localOrigin.setZero()
+
+    // Transform the axis to local
+    Transform.vectorToLocalFrame(pos, quat, axis, localAxis)
+    Transform.pointToLocalFrame(pos, quat, localOrigin, localOrigin)
+    const add = localOrigin.dot(localAxis)
+
+    min = max = vs[0].dot(localAxis)
+
+    for (let i = 1; i < n; i++) {
+      const val = vs[i].dot(localAxis)
+
+      if (val > max) {
+        max = val
+      }
+
+      if (val < min) {
+        min = val
+      }
+    }
+
+    min -= add
+    max -= add
+
+    if (min > max) {
+      // Inconsistent - swap
+      const temp = min
+      min = max
+      max = temp
+    }
+    // Output
+    result[0] = max
+    result[1] = min
   }
 }
 
 const maxminA: number[] = []
 const maxminB: number[] = []
-
-/**
- * Get max and min dot product of a convex hull at position (pos,quat) projected onto an axis.
- * Results are saved in the array maxmin.
- * @static
- * @method project
- * @param {ConvexPolyhedron} hull
- * @param {Vec3} axis
- * @param {Vec3} pos
- * @param {Quaternion} quat
- * @param {array} result result[0] and result[1] will be set to maximum and minimum, respectively.
- */
-ConvexPolyhedron.project = (
-  shape: ConvexPolyhedron,
-  axis: Vec3,
-  pos: Vec3,
-  quat: Quaternion,
-  result: number[]
-): void => {
-  const n = shape.vertices.length
-  const localAxis = new Vec3()
-  let max = 0
-  let min = 0
-  const localOrigin = new Vec3()
-  const vs = shape.vertices
-
-  localOrigin.setZero()
-
-  // Transform the axis to local
-  Transform.vectorToLocalFrame(pos, quat, axis, localAxis)
-  Transform.pointToLocalFrame(pos, quat, localOrigin, localOrigin)
-  const add = localOrigin.dot(localAxis)
-
-  min = max = vs[0].dot(localAxis)
-
-  for (let i = 1; i < n; i++) {
-    const val = vs[i].dot(localAxis)
-
-    if (val > max) {
-      max = val
-    }
-
-    if (val < min) {
-      min = val
-    }
-  }
-
-  min -= add
-  max -= add
-
-  if (min > max) {
-    // Inconsistent - swap
-    const temp = min
-    min = max
-    max = temp
-  }
-  // Output
-  result[0] = max
-  result[1] = min
-}

@@ -31,7 +31,7 @@ export class Vec3 {
   /**
    * Vector cross product
    * @method cross
-   * @param {Vec3} v
+   * @param {Vec3} vector
    * @param {Vec3} target Optional. Target to save in.
    * @return {Vec3}
    */
@@ -76,7 +76,7 @@ export class Vec3 {
   /**
    * Vector addition
    * @method vadd
-   * @param {Vec3} v
+   * @param {Vec3} vector
    * @param {Vec3} target Optional.
    * @return {Vec3}
    */
@@ -95,7 +95,7 @@ export class Vec3 {
   /**
    * Vector subtraction
    * @method vsub
-   * @param {Vec3} v
+   * @param {Vec3} vector
    * @param {Vec3} target Optional. Target to save in.
    * @return {Vec3}
    */

@@ -92,6 +92,3 @@ export class ConeTwistConstraint extends PointToPointConstraint {
     twist.maxAngle = this.twistAngle
   }
 }
-
-const ConeTwistConstraint_update_tmpVec1 = new Vec3()
-const ConeTwistConstraint_update_tmpVec2 = new Vec3()

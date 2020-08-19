@@ -1,6 +1,5 @@
 import { Body } from '../objects/Body'
 import { Vec3 } from '../math/Vec3'
-import { Quaternion } from '../math/Quaternion'
 import type { AABB } from '../collision/AABB'
 import type { World } from '../world/World'
 
@@ -14,8 +13,6 @@ export class Broadphase {
   world: World | null // The world to search for collisions in.
   useBoundingBoxes: boolean // If set to true, the broadphase uses bounding boxes for intersection test, else it uses bounding spheres.
   dirty: boolean // Set to true if the objects in the world moved.
-
-  static boundingSphereCheck: (bodyA: Body, bodyB: Body) => boolean
 
   constructor() {
     this.world = null
@@ -36,12 +33,13 @@ export class Broadphase {
 
   /**
    * Check if a body pair needs to be intersection tested at all.
+   * @static
    * @method needBroadphaseCollision
    * @param {Body} bodyA
    * @param {Body} bodyB
-   * @return {bool}
+   * @return {Boolean}
    */
-  needBroadphaseCollision(bodyA: Body, bodyB: Body): boolean {
+  static needBroadphaseCollision(bodyA: Body, bodyB: Body): boolean {
     // Check collision filter masks
     if (
       (bodyA.collisionFilterGroup & bodyB.collisionFilterMask) === 0 ||
@@ -72,13 +70,22 @@ export class Broadphase {
    */
   intersectionTest(bodyA: Body, bodyB: Body, pairs1: Body[], pairs2: Body[]): void {
     if (this.useBoundingBoxes) {
-      this.doBoundingBoxBroadphase(bodyA, bodyB, pairs1, pairs2)
+      Broadphase.doBoundingBoxBroadphase(bodyA, bodyB, pairs1, pairs2)
     } else {
-      this.doBoundingSphereBroadphase(bodyA, bodyB, pairs1, pairs2)
+      Broadphase.doBoundingSphereBroadphase(bodyA, bodyB, pairs1, pairs2)
     }
   }
 
-  doBoundingSphereBroadphase(bodyA: Body, bodyB: Body, pairs1: Body[], pairs2: Body[]): void {
+  /**
+   * Check if the bounding spheres of two bodies are intersecting.
+   * @static
+   * @method doBoundingSphereBroadphase
+   * @param {Body} bodyA
+   * @param {Body} bodyB
+   * @param {Array} pairs1 bodyA is appended to this array if intersection
+   * @param {Array} pairs2 bodyB is appended to this array if intersection
+   */
+  static doBoundingSphereBroadphase(bodyA: Body, bodyB: Body, pairs1: Body[], pairs2: Body[]): void {
     const r = Broadphase_collisionPairs_r
     bodyB.position.vsub(bodyA.position, r)
     const boundingRadiusSum2 = (bodyA.boundingRadius + bodyB.boundingRadius) ** 2
@@ -91,13 +98,14 @@ export class Broadphase {
 
   /**
    * Check if the bounding boxes of two bodies are intersecting.
+   * @static
    * @method doBoundingBoxBroadphase
    * @param {Body} bodyA
    * @param {Body} bodyB
    * @param {Array} pairs1
    * @param {Array} pairs2
    */
-  doBoundingBoxBroadphase(bodyA: Body, bodyB: Body, pairs1: Body[], pairs2: Body[]): void {
+  static doBoundingBoxBroadphase(bodyA: Body, bodyB: Body, pairs1: Body[], pairs2: Body[]): void {
     if (bodyA.aabbNeedsUpdate) {
       bodyA.computeAABB()
     }
@@ -112,7 +120,14 @@ export class Broadphase {
     }
   }
 
-  makePairsUnique(pairs1: Body[], pairs2: Body[]): void {
+  /**
+   * Removes duplicate pairs from the pair arrays.
+   * @static
+   * @method makePairsUnique
+   * @param {Array} pairs1
+   * @param {Array} pairs2
+   */
+  static makePairsUnique(pairs1: Body[], pairs2: Body[]): void {
     const t = Broadphase_makePairsUnique_temp
     const p1 = Broadphase_makePairsUnique_p1
     const p2 = Broadphase_makePairsUnique_p2
@@ -162,46 +177,26 @@ export class Broadphase {
     console.warn('.aabbQuery is not implemented in this Broadphase subclass.')
     return []
   }
+
+  /**
+   * Check if the bounding spheres of two bodies overlap.
+   * @method boundingSphereCheck
+   * @param {Body} bodyA
+   * @param {Body} bodyB
+   * @return {boolean}
+   */
+  static boundingSphereCheck(bodyA: Body, bodyB: Body): boolean {
+    const dist = new Vec3() // bsc_dist;
+    bodyA.position.vsub(bodyB.position, dist)
+    const sa = bodyA.shapes[0]
+    const sb = bodyB.shapes[0]
+    return Math.pow(sa.boundingSphereRadius + sb.boundingSphereRadius, 2) > dist.lengthSquared()
+  }
 }
 
-/**
- * Check if the bounding spheres of two bodies are intersecting.
- * @method doBoundingSphereBroadphase
- * @param {Body} bodyA
- * @param {Body} bodyB
- * @param {Array} pairs1 bodyA is appended to this array if intersection
- * @param {Array} pairs2 bodyB is appended to this array if intersection
- */
-const // Temp objects
-  Broadphase_collisionPairs_r = new Vec3()
-
-const Broadphase_collisionPairs_normal = new Vec3()
-const Broadphase_collisionPairs_quat = new Quaternion()
-const Broadphase_collisionPairs_relpos = new Vec3()
-
-/**
- * Removes duplicate pairs from the pair arrays.
- * @method makePairsUnique
- * @param {Array} pairs1
- * @param {Array} pairs2
- */
+// Temp objects
+const Broadphase_collisionPairs_r = new Vec3()
 const Broadphase_makePairsUnique_temp: Record<string, any> = { keys: [] }
-
 const Broadphase_makePairsUnique_p1: Body[] = []
 const Broadphase_makePairsUnique_p2: Body[] = []
 
-/**
- * Check if the bounding spheres of two bodies overlap.
- * @method boundingSphereCheck
- * @param {Body} bodyA
- * @param {Body} bodyB
- * @return {boolean}
- */
-const bsc_dist = new Vec3()
-Broadphase.boundingSphereCheck = (bodyA, bodyB) => {
-  const dist = new Vec3() // bsc_dist;
-  bodyA.position.vsub(bodyB.position, dist)
-  const sa = bodyA.shapes[0]
-  const sb = bodyB.shapes[0]
-  return Math.pow(sa.boundingSphereRadius + sb.boundingSphereRadius, 2) > dist.lengthSquared()
-}

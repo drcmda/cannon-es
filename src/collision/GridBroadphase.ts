@@ -229,7 +229,7 @@ export class GridBroadphase extends Broadphase {
           const bi = bin[xi]
           for (let yi = 0; yi !== xi; yi++) {
             const bj = bin[yi]
-            if (this.needBroadphaseCollision(bi, bj)) {
+            if (Broadphase.needBroadphaseCollision(bi, bj)) {
               this.intersectionTest(bi, bj, pairs1, pairs2)
             }
           }
@@ -249,7 +249,7 @@ export class GridBroadphase extends Broadphase {
     //		}
     //	}
 
-    this.makePairsUnique(pairs1, pairs2)
+    Broadphase.makePairsUnique(pairs1, pairs2)
   }
 }
 

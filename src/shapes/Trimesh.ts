@@ -32,15 +32,6 @@ export class Trimesh extends Shape {
   scale: Vec3 // Local scaling of the mesh. Use .setScale() to set it.
   tree: Octree // The indexed triangles. Use .updateTree() to update it.
 
-  static computeNormal: (va: Vec3, vb: Vec3, vc: Vec3, target: Vec3) => void
-  static createTorus: (
-    radius: number,
-    tube: number,
-    radialSegments: number,
-    tubularSegments: number,
-    arc: number
-  ) => Trimesh
-
   constructor(vertices: number[], indices: number[]) {
     super({ type: Shape.types.TRIMESH })
 
@@ -437,6 +428,69 @@ export class Trimesh extends Shape {
   volume() {
     return (4.0 * Math.PI * this.boundingSphereRadius) / 3.0
   }
+
+  /**
+   * Get face normal given 3 vertices
+   * @static
+   * @method computeNormal
+   * @param {Vec3} va
+   * @param {Vec3} vb
+   * @param {Vec3} vc
+   * @param {Vec3} target
+   */
+  static computeNormal(va: Vec3, vb: Vec3, vc: Vec3, target: Vec3): void {
+    const cb = new Vec3()
+    const ab = new Vec3()
+    vb.vsub(va, ab)
+    vc.vsub(vb, cb)
+    cb.cross(ab, target)
+    if (!target.isZero()) {
+      target.normalize()
+    }
+  }
+
+  /**
+   * Create a Trimesh instance, shaped as a torus.
+   * @static
+   * @method createTorus
+   * @param  {number} [radius=1]
+   * @param  {number} [tube=0.5]
+   * @param  {number} [radialSegments=8]
+   * @param  {number} [tubularSegments=6]
+   * @param  {number} [arc=6.283185307179586]
+   * @return {Trimesh} A torus
+   */
+  createTorus(radius = 1, tube = 0.5, radialSegments = 8, tubularSegments = 6, arc = Math.PI * 2): Trimesh {
+    const vertices = []
+    const indices = []
+
+    for (let j = 0; j <= radialSegments; j++) {
+      for (let i = 0; i <= tubularSegments; i++) {
+        const u = (i / tubularSegments) * arc
+        const v = (j / radialSegments) * Math.PI * 2
+
+        const x = (radius + tube * Math.cos(v)) * Math.cos(u)
+        const y = (radius + tube * Math.cos(v)) * Math.sin(u)
+        const z = tube * Math.sin(v)
+
+        vertices.push(x, y, z)
+      }
+    }
+
+    for (let j = 1; j <= radialSegments; j++) {
+      for (let i = 1; i <= tubularSegments; i++) {
+        const a = (tubularSegments + 1) * j + i - 1
+        const b = (tubularSegments + 1) * (j - 1) + i - 1
+        const c = (tubularSegments + 1) * (j - 1) + i
+        const d = (tubularSegments + 1) * j + i
+
+        indices.push(a, b, d)
+        indices.push(b, c, d)
+      }
+    }
+
+    return new Trimesh(vertices, indices)
+  }
 }
 
 const computeNormals_n = new Vec3()
@@ -445,26 +499,6 @@ const unscaledAABB = new AABB()
 
 const getEdgeVector_va = new Vec3()
 const getEdgeVector_vb = new Vec3()
-
-/**
- * Get face normal given 3 vertices
- * @static
- * @method computeNormal
- * @param {Vec3} va
- * @param {Vec3} vb
- * @param {Vec3} vc
- * @param {Vec3} target
- */
-const cb = new Vec3()
-const ab = new Vec3()
-Trimesh.computeNormal = (va: Vec3, vb: Vec3, vc: Vec3, target: Vec3): void => {
-  vb.vsub(va, ab)
-  vc.vsub(vb, cb)
-  cb.cross(ab, target)
-  if (!target.isZero()) {
-    target.normalize()
-  }
-}
 
 const va = new Vec3()
 const vb = new Vec3()
@@ -476,46 +510,3 @@ const computeLocalAABB_worldVert = new Vec3()
 
 const calculateWorldAABB_frame = new Transform()
 const calculateWorldAABB_aabb = new AABB()
-
-/**
- * Create a Trimesh instance, shaped as a torus.
- * @static
- * @method createTorus
- * @param  {number} [radius=1]
- * @param  {number} [tube=0.5]
- * @param  {number} [radialSegments=8]
- * @param  {number} [tubularSegments=6]
- * @param  {number} [arc=6.283185307179586]
- * @return {Trimesh} A torus
- */
-Trimesh.createTorus = (radius = 1, tube = 0.5, radialSegments = 8, tubularSegments = 6, arc = Math.PI * 2): Trimesh => {
-  const vertices = []
-  const indices = []
-
-  for (let j = 0; j <= radialSegments; j++) {
-    for (let i = 0; i <= tubularSegments; i++) {
-      const u = (i / tubularSegments) * arc
-      const v = (j / radialSegments) * Math.PI * 2
-
-      const x = (radius + tube * Math.cos(v)) * Math.cos(u)
-      const y = (radius + tube * Math.cos(v)) * Math.sin(u)
-      const z = tube * Math.sin(v)
-
-      vertices.push(x, y, z)
-    }
-  }
-
-  for (let j = 1; j <= radialSegments; j++) {
-    for (let i = 1; i <= tubularSegments; i++) {
-      const a = (tubularSegments + 1) * j + i - 1
-      const b = (tubularSegments + 1) * (j - 1) + i - 1
-      const c = (tubularSegments + 1) * (j - 1) + i
-      const d = (tubularSegments + 1) * j + i
-
-      indices.push(a, b, d)
-      indices.push(b, c, d)
-    }
-  }
-
-  return new Trimesh(vertices, indices)
-}
