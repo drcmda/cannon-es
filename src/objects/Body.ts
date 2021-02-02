@@ -400,6 +400,33 @@ export class Body extends EventTarget {
   }
 
   /**
+   * Remove a shape from the body.
+   * @method removeShape
+   * @param {Shape} shape
+   * @return {Body} The body object, for chainability.
+   */
+  removeShape(shape: Shape): Body {
+    
+    const index = this.shapes.indexOf(shape)
+    
+    if (index > -1) {
+      this.shapes.splice(index, 1)
+      this.shapeOffsets.splice(index, 1)
+      this.shapeOrientations.splice(index, 1)
+      this.updateMassProperties()
+      this.updateBoundingRadius()
+
+      this.aabbNeedsUpdate = true
+
+      shape.body = null
+    } else {
+      console.warn('Shape does not belong to the body');
+    }
+
+    return this
+  }
+
+  /**
    * Update the bounding radius of the body. Should be done if any of the shapes are changed.
    * @method updateBoundingRadius
    */
