@@ -36,7 +36,7 @@ class ObjectCollisionMatrix {
       i = temp;
     }
 
-    return `${i}-${j}` in this.matrix;
+    return i + "-" + j in this.matrix;
   }
   /**
    * set
@@ -58,9 +58,9 @@ class ObjectCollisionMatrix {
     }
 
     if (value) {
-      this.matrix[`${i}-${j}`] = true;
+      this.matrix[i + "-" + j] = true;
     } else {
-      delete this.matrix[`${i}-${j}`];
+      delete this.matrix[i + "-" + j];
     }
   }
   /**
@@ -318,7 +318,7 @@ class Mat3 {
     target.x = (eqns[0 * nc + 3] - eqns[0 * nc + 2] * target.z - eqns[0 * nc + 1] * target.y) / eqns[0 * nc + 0];
 
     if (isNaN(target.x) || isNaN(target.y) || isNaN(target.z) || target.x === Infinity || target.y === Infinity || target.z === Infinity) {
-      throw `Could not solve equation! Got x=[${target.toString()}], b=[${b.toString()}], A=[${this.toString()}]`;
+      throw "Could not solve equation! Got x=[" + target.toString() + "], b=[" + b.toString() + "], A=[" + this.toString() + "]";
     }
 
     return target;
@@ -477,7 +477,7 @@ class Mat3 {
         p = eqns[nr + j + nc * i];
 
         if (isNaN(p) || p === Infinity) {
-          throw `Could not reverse! A=[${this.toString()}]`;
+          throw "Could not reverse! A=[" + this.toString() + "]";
         }
 
         target.e(i, j, p);
@@ -842,7 +842,7 @@ class Vec3 {
 
 
   toString() {
-    return `${this.x},${this.y},${this.z}`;
+    return this.x + "," + this.y + "," + this.z;
   }
   /**
    * Converts to an array
@@ -1439,7 +1439,7 @@ class Quaternion {
 
 
   toString() {
-    return `${this.x},${this.y},${this.z},${this.w}`;
+    return this.x + "," + this.y + "," + this.z + "," + this.w;
   }
   /**
    * Convert to an Array
@@ -1693,7 +1693,7 @@ class Quaternion {
         break;
 
       default:
-        throw new Error(`Euler order ${order} not supported yet.`);
+        throw new Error("Euler order " + order + " not supported yet.");
     }
 
     target.y = heading;
@@ -1934,7 +1934,7 @@ class Shape {
 
 
   updateBoundingSphereRadius() {
-    throw `computeBoundingSphereRadius() not implemented for shape type ${this.type}`;
+    throw "computeBoundingSphereRadius() not implemented for shape type " + this.type;
   }
   /**
    * Get the volume of this shape
@@ -1942,7 +1942,7 @@ class Shape {
 
 
   volume() {
-    throw `volume() not implemented for shape type ${this.type}`;
+    throw "volume() not implemented for shape type " + this.type;
   }
   /**
    * Calculates the inertia in the local frame for this shape.
@@ -1951,7 +1951,7 @@ class Shape {
 
 
   calculateLocalInertia(mass, target) {
-    throw `calculateLocalInertia() not implemented for shape type ${this.type}`;
+    throw "calculateLocalInertia() not implemented for shape type " + this.type;
   }
   /**
    * @todo use abstract for these kind of methods
@@ -1959,7 +1959,7 @@ class Shape {
 
 
   calculateWorldAABB(pos, quat, min, max) {
-    throw `calculateWorldAABB() not implemented for shape type ${this.type}`;
+    throw "calculateWorldAABB() not implemented for shape type " + this.type;
   }
 
 }
@@ -2197,7 +2197,7 @@ class ConvexPolyhedron extends Shape {
       // Check so all vertices exists for this face
       for (let j = 0; j < this.faces[i].length; j++) {
         if (!this.vertices[this.faces[i][j]]) {
-          throw new Error(`Vertex ${this.faces[i][j]} not found!`);
+          throw new Error("Vertex " + this.faces[i][j] + " not found!");
         }
       }
 
@@ -2208,10 +2208,10 @@ class ConvexPolyhedron extends Shape {
       const vertex = this.vertices[this.faces[i][0]];
 
       if (n.dot(vertex) < 0) {
-        console.error(`.faceNormals[${i}] = Vec3(${n.toString()}) looks like it points into the shape? The vertices follow. Make sure they are ordered CCW around the normal, using the right hand rule.`);
+        console.error(".faceNormals[" + i + "] = Vec3(" + n.toString() + ") looks like it points into the shape? The vertices follow. Make sure they are ordered CCW around the normal, using the right hand rule.");
 
         for (let j = 0; j < this.faces[i].length; j++) {
-          console.warn(`.vertices[${this.faces[i][j]}] = Vec3(${this.vertices[this.faces[i][j]].toString()})`);
+          console.warn(".vertices[" + this.faces[i][j] + "] = Vec3(" + this.vertices[this.faces[i][j]].toString() + ")");
         }
       }
     }
@@ -2564,7 +2564,7 @@ class ConvexPolyhedron extends Shape {
       let depth = planeNormalWS.dot(pVtxIn[i]) + planeEqWS; // ???
 
       if (depth <= minDist) {
-        console.log(`clamped: depth=${depth} to minDist=${minDist}`);
+        console.log("clamped: depth=" + depth + " to minDist=" + minDist);
         depth = minDist;
       }
 
@@ -4150,7 +4150,7 @@ class Broadphase {
     for (let i = 0; i !== N; i++) {
       const id1 = p1[i].id;
       const id2 = p2[i].id;
-      const key = id1 < id2 ? `${id1},${id2}` : `${id2},${id1}`;
+      const key = id1 < id2 ? id1 + "," + id2 : id2 + "," + id1;
       t[key] = i;
       t.keys.push(key);
     }
@@ -8890,7 +8890,7 @@ class Heightfield extends Shape {
   }
 
   getCacheConvexTrianglePillarKey(xi, yi, getUpperTriangle) {
-    return `${xi}_${yi}_${getUpperTriangle ? 1 : 0}`;
+    return xi + "_" + yi + "_" + (getUpperTriangle ? 1 : 0);
   }
 
   getCachedConvexTrianglePillar(xi, yi, getUpperTriangle) {
@@ -9551,7 +9551,7 @@ class Trimesh extends Shape {
     const edges = {};
 
     const add = (a, b) => {
-      const key = a < b ? `${a}_${b}` : `${b}_${a}`;
+      const key = a < b ? a + "_" + b : b + "_" + a;
       edges[key] = true;
     };
 
@@ -12126,7 +12126,7 @@ class TupleDictionary {
       i = temp;
     }
 
-    return this.data[`${i}-${j}`];
+    return this.data[i + "-" + j];
   }
   /** set */
 
@@ -12138,7 +12138,7 @@ class TupleDictionary {
       i = temp;
     }
 
-    const key = `${i}-${j}`; // Check if key already exists
+    const key = i + "-" + j; // Check if key already exists
 
     if (!this.get(i, j)) {
       this.data.keys.push(key);
