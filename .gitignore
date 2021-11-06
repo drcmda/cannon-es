@@ -14,3 +14,4 @@ package-lock.json
 coverage/
 .idea
 .rpt2_cache/
+.eslintcache

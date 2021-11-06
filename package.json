@@ -29,12 +29,12 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false --strict",
     "typegen": "tsc --outFile dist/cannon-es.d.ts",
     "generate-docs": "typedoc && node ./scripts/inject-css-in-docs.mjs",
-    "test": "jest"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick"
-    }
+    "test": "jest",
+    "eslint": "eslint .",
+    "eslint-fix": "eslint --fix .",
+    "prettier": "prettier --list-different .",
+    "prettier-fix": "prettier --write .",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -53,11 +53,15 @@
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-replace": "^2.4.2",
     "@types/jest": "^26.0.22",
+    "@typescript-eslint/eslint-plugin": "^4.28.0",
+    "@typescript-eslint/parser": "^4.28.0",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
     "fs-extra": "^9.1.0",
-    "husky": "4.3.8",
+    "husky": "^7.0.4",
     "jest": "^26.6.0",
+    "lint-staged": "^11.2.6",
     "prettier": "^2.2.1",
-    "pretty-quick": "^3.1.0",
     "readdirp": "^3.6.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.44.0",
@@ -65,5 +69,9 @@
     "ts-jest": "^26.5.4",
     "typedoc": "0.20.30",
     "typescript": "^4.2.4"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+    "*.{js,jsx,ts,tsx,md}": "prettier --write"
   }
 }
