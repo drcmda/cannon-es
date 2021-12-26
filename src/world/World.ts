@@ -901,7 +901,11 @@ export class World extends EventTarget {
         if (shapeB) beginShapeContactEvent.bodyB = shapeB.body
         this.dispatchEvent(beginShapeContactEvent)
       }
-      beginShapeContactEvent.bodyA = beginShapeContactEvent.bodyB = beginShapeContactEvent.shapeA = beginShapeContactEvent.shapeB = null
+      beginShapeContactEvent.bodyA =
+        beginShapeContactEvent.bodyB =
+        beginShapeContactEvent.shapeA =
+        beginShapeContactEvent.shapeB =
+          null
     }
 
     if (hasEndShapeContact) {
@@ -914,7 +918,11 @@ export class World extends EventTarget {
         if (shapeB) endShapeContactEvent.bodyB = shapeB.body
         this.dispatchEvent(endShapeContactEvent)
       }
-      endShapeContactEvent.bodyA = endShapeContactEvent.bodyB = endShapeContactEvent.shapeA = endShapeContactEvent.shapeB = null
+      endShapeContactEvent.bodyA =
+        endShapeContactEvent.bodyB =
+        endShapeContactEvent.shapeA =
+        endShapeContactEvent.shapeB =
+          null
     }
   }
 
