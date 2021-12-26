@@ -5,7 +5,8 @@ import { Narrowphase } from './Narrowphase'
 import { Sphere } from '../shapes/Sphere'
 import { Body } from '../objects/Body'
 import { World } from '../world/World'
-import { ContactEquation } from '../equations/ContactEquation'
+
+import type { ContactEquation } from '../equations/ContactEquation'
 
 describe('Narrowphase', () => {
   test('sphere + sphere contact', () => {

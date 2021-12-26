@@ -1,4 +1,5 @@
 import { Broadphase } from '../collision/Broadphase'
+
 import type { AABB } from '../collision/AABB'
 import type { Body } from '../objects/Body'
 import type { World } from '../world/World'
@@ -9,13 +10,6 @@ import type { World } from '../world/World'
  * The naive broadphase looks at all possible pairs without restriction, therefore it has complexity N^2 _(which is bad)_
  */
 export class NaiveBroadphase extends Broadphase {
-  /**
-   * @todo Remove useless constructor
-   */
-  constructor() {
-    super()
-  }
-
   /**
    * Get all the collision pairs in the physics world
    */
@@ -59,5 +53,9 @@ export class NaiveBroadphase extends Broadphase {
     }
 
     return result
+  }
+
+  setWorld() {
+    /**/
   }
 }

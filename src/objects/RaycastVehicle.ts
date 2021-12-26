@@ -1,14 +1,25 @@
-import type { Body } from '../objects/Body'
 import { Vec3 } from '../math/Vec3'
 import { Quaternion } from '../math/Quaternion'
-import { Ray } from '../collision/Ray'
 import { WheelInfo } from '../objects/WheelInfo'
+
+import type { Body } from '../objects/Body'
 import type { WheelInfoOptions } from '../objects/WheelInfo'
 import type { Transform } from '../math/Transform'
 import type { Constraint } from '../constraints/Constraint'
 import type { World } from '../world/World'
 
-export type RaycastVehicleOptions = ConstructorParameters<typeof RaycastVehicle>[0]
+export type AxisIndex = 0 | 1 | 2
+
+export type RaycastVehicleOptions = {
+  /** The car chassis body. */
+  chassisBody: Body
+  /** Index of the forward axis. x=0, y=1, z=2 */
+  indexForwardAxis?: AxisIndex
+  /** Index of the right axis. x=0, y=1, z=2 */
+  indexRightAxis?: AxisIndex
+  /** Index of the up axis. x=0, y=1, z=2 */
+  indexUpAxis?: AxisIndex
+}
 
 /**
  * Vehicle helper class that casts rays from the wheel positions towards the ground and applies forces.
@@ -21,12 +32,12 @@ export class RaycastVehicle {
   /** Will be set to true if the car is sliding. */
   sliding: boolean
   world: World | null
-  /** Index of the right axis. x=0, y=1, z=2 */
-  indexRightAxis: number
   /** Index of the forward axis. x=0, y=1, z=2 */
-  indexForwardAxis: number
+  indexForwardAxis: AxisIndex
+  /** Index of the right axis. x=0, y=1, z=2 */
+  indexRightAxis: AxisIndex
   /** Index of the up axis. x=0, y=1, z=2 */
-  indexUpAxis: number
+  indexUpAxis: AxisIndex
   /** The constraints. */
   constraints: Constraint[]
   /** Optional pre-step callback. */
@@ -35,25 +46,18 @@ export class RaycastVehicle {
   /** Number of wheels on the ground. */
   numWheelsOnGround: number
 
-  constructor(options: {
-    /** The car chassis body. */
-    chassisBody: Body
-    /** Index of the right axis. x=0, y=1, z=2 */
-    indexRightAxis?: number
-    /** Index of the forward axis. x=0, y=1, z=2 */
-    indexForwardAxis?: number
-    /** Index of the up axis. x=0, y=1, z=2 */
-    indexUpAxis?: number
-  }) {
-    this.chassisBody = options.chassisBody
+  constructor({ chassisBody, indexForwardAxis = 0, indexRightAxis = 2, indexUpAxis = 1 }: RaycastVehicleOptions) {
+    this.chassisBody = chassisBody
     this.wheelInfos = []
     this.sliding = false
     this.world = null
-    this.indexRightAxis = typeof options.indexRightAxis !== 'undefined' ? options.indexRightAxis : 2
-    this.indexForwardAxis = typeof options.indexForwardAxis !== 'undefined' ? options.indexForwardAxis : 0
-    this.indexUpAxis = typeof options.indexUpAxis !== 'undefined' ? options.indexUpAxis : 1
+    this.indexForwardAxis = indexForwardAxis
+    this.indexRightAxis = indexRightAxis
+    this.indexUpAxis = indexUpAxis
     this.constraints = []
-    this.preStepCallback = () => {}
+    this.preStepCallback = () => {
+      /**/
+    }
     this.currentVehicleSpeedKmHour = 0
     this.numWheelsOnGround = 0
   }
@@ -96,9 +100,8 @@ export class RaycastVehicle {
    */
   addToWorld(world: World): void {
     world.addBody(this.chassisBody)
-    const that = this
     this.preStepCallback = () => {
-      that.updateVehicle(world.dt)
+      this.updateVehicle(world.dt)
     }
     world.addEventListener('preStep', this.preStepCallback)
     this.world = world
@@ -107,7 +110,7 @@ export class RaycastVehicle {
   /**
    * Get one of the wheel axles, world-oriented.
    */
-  private getVehicleAxisWorld(axisIndex: number, result: Vec3): void {
+  private getVehicleAxisWorld(axisIndex: AxisIndex, result: Vec3): void {
     result.set(axisIndex === 0 ? 1 : 0, axisIndex === 1 ? 1 : 0, axisIndex === 2 ? 1 : 0)
     this.chassisBody.vectorToWorldFrame(result, result)
   }
@@ -135,7 +138,7 @@ export class RaycastVehicle {
       this.castRay(wheelInfos[i])
     }
 
-    this.updateSuspension(timeStep)
+    this.updateSuspension()
 
     const impulse = new Vec3()
     const relpos = new Vec3()
@@ -197,7 +200,7 @@ export class RaycastVehicle {
     }
   }
 
-  updateSuspension(deltaTime: number): void {
+  updateSuspension(): void {
     const chassisBody = this.chassisBody
     const chassisMass = chassisBody.mass
     const wheelInfos = this.wheelInfos
@@ -240,7 +243,6 @@ export class RaycastVehicle {
    * Remove the vehicle including its constraints from the world.
    */
   removeFromWorld(world: World): void {
-    const constraints = this.constraints
     world.removeBody(this.chassisBody)
     world.removeEventListener('preStep', this.preStepCallback)
     this.world = null
@@ -262,15 +264,13 @@ export class RaycastVehicle {
     source.vadd(rayvector, target)
     const raycastResult = wheel.raycastResult
 
-    const param = 0
-
     raycastResult.reset()
     // Turn off ray collision with the chassis temporarily
     const oldState = chassisBody.collisionResponse
     chassisBody.collisionResponse = false
 
     // Cast ray against world
-    this.world!.rayTest(source, target, raycastResult)
+    this.world?.raycastClosest(source, target, { skipBackfaces: true }, raycastResult)
     chassisBody.collisionResponse = oldState
 
     const object = raycastResult.body
@@ -336,9 +336,9 @@ export class RaycastVehicle {
    * @param wheelIndex The wheel index to update.
    */
   updateWheelTransform(wheelIndex: number): void {
-    const up = tmpVec4
-    const right = tmpVec5
-    const fwd = tmpVec6
+    const up = tmpVec1
+    const right = tmpVec2
+    const fwd = tmpVec3
 
     const wheel = this.wheelInfos[wheelIndex]
     this.updateWheelTransformWorld(wheel)
@@ -559,12 +559,6 @@ export class RaycastVehicle {
 const tmpVec1 = new Vec3()
 const tmpVec2 = new Vec3()
 const tmpVec3 = new Vec3()
-const tmpVec4 = new Vec3()
-const tmpVec5 = new Vec3()
-const tmpVec6 = new Vec3()
-const tmpRay = new Ray()
-
-const torque = new Vec3()
 
 const castRay_rayvector = new Vec3()
 const castRay_target = new Vec3()
@@ -590,13 +584,9 @@ function calcRollingFriction(
   let j1 = 0
   const contactPosWorld = frictionPosWorld
 
-  // const rel_pos1 = new Vec3();
-  // const rel_pos2 = new Vec3();
   const vel1 = calcRollingFriction_vel1
   const vel2 = calcRollingFriction_vel2
   const vel = calcRollingFriction_vel
-  // contactPosWorld.vsub(body0.position, rel_pos1);
-  // contactPosWorld.vsub(body1.position, rel_pos2);
 
   body0.getVelocityAtWorldPoint(contactPosWorld, vel1)
   body1.getVelocityAtWorldPoint(contactPosWorld, vel2)
@@ -626,6 +616,7 @@ const computeImpulseDenominator_r0 = new Vec3()
 const computeImpulseDenominator_c0 = new Vec3()
 const computeImpulseDenominator_vec = new Vec3()
 const computeImpulseDenominator_m = new Vec3()
+
 function computeImpulseDenominator(body: Body, pos: Vec3, normal: Vec3): number {
   const r0 = computeImpulseDenominator_r0
   const c0 = computeImpulseDenominator_c0
@@ -650,10 +641,6 @@ function resolveSingleBilateral(body1: Body, pos1: Vec3, body2: Body, pos2: Vec3
   if (normalLenSqr > 1.1) {
     return 0 // no impulse
   }
-  // const rel_pos1 = new Vec3();
-  // const rel_pos2 = new Vec3();
-  // pos1.vsub(body1.position, rel_pos1);
-  // pos2.vsub(body2.position, rel_pos2);
 
   const vel1 = resolveSingleBilateral_vel1
   const vel2 = resolveSingleBilateral_vel2

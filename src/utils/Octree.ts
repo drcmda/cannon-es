@@ -1,33 +1,32 @@
 import { AABB } from '../collision/AABB'
 import { Vec3 } from '../math/Vec3'
+
 import type { Transform } from '../math/Transform'
 import type { Ray } from '../collision/Ray'
+
+type OctreeNodeOptions = {
+  aabb?: AABB
+  root?: Octree | null
+}
 
 /**
  * OctreeNode
  */
 class OctreeNode {
-  /** The root node */
-  root: OctreeNode | null
   /** Boundary of this node */
   aabb: AABB
-  /** Contained data at the current node level */
-  data: number[]
   /** Children to this node */
   children: OctreeNode[]
+  /** Contained data at the current node level */
+  data: number[]
+  /** The root node */
+  root: OctreeNode | null
 
-  constructor(
-    options: {
-      /** The root node */
-      root?: Octree | null
-      /** Boundary of this node */
-      aabb?: AABB
-    } = {}
-  ) {
-    this.root = options.root || null
-    this.aabb = options.aabb ? options.aabb.clone() : new AABB()
-    this.data = []
+  constructor({ aabb, root = null }: OctreeNodeOptions) {
+    this.aabb = aabb ? aabb.clone() : new AABB()
     this.children = []
+    this.data = []
+    this.root = root
   }
 
   /**
@@ -129,27 +128,9 @@ class OctreeNode {
    * @return The "result" object
    */
   aabbQuery(aabb: AABB, result: number[]): number[] {
-    const nodeData = this.data
-
-    // abort if the range does not intersect this node
-    // if (!this.aabb.overlaps(aabb)){
-    //     return result;
-    // }
-
-    // Add objects at this level
-    // Array.prototype.push.apply(result, nodeData);
-
-    // Add child data
-    // @todo unwrap recursion into a queue / loop, that's faster in JS
-    const children = this.children
-
-    // for (let i = 0, N = this.children.length; i !== N; i++) {
-    //     children[i].aabbQuery(aabb, result);
-    // }
-
     const queue = [this]
     while (queue.length) {
-      const node = queue.pop() as OctreeNode
+      const node = queue.pop()!
       if (node.aabb.overlaps(aabb)) {
         Array.prototype.push.apply(result, node.data)
       }
@@ -186,6 +167,10 @@ class OctreeNode {
   }
 }
 
+export type OctreeOptions = {
+  maxDepth?: number
+}
+
 /**
  * Octree
  */
@@ -194,24 +179,15 @@ export class Octree extends OctreeNode {
    * Maximum subdivision depth
    * @default 8
    */
-  maxDepth: number
+  maxDepth = 8
 
   /**
    * @param aabb The total AABB of the tree
    */
-  constructor(
-    aabb?: AABB,
-    options: {
-      /**
-       * Maximum subdivision depth
-       * @default 8
-       */
-      maxDepth?: number
-    } = {}
-  ) {
+  constructor(aabb?: AABB, { maxDepth = 8 }: OctreeOptions = {}) {
     super({ root: null, aabb })
 
-    this.maxDepth = typeof options.maxDepth !== 'undefined' ? options.maxDepth : 8
+    this.maxDepth = maxDepth
   }
 }
 

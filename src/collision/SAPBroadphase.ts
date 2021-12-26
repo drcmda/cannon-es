@@ -1,7 +1,10 @@
 import { Broadphase } from '../collision/Broadphase'
+
 import type { AABB } from '../collision/AABB'
 import type { Body } from '../objects/Body'
 import type { World } from '../world/World'
+
+type AxisIndex = 0 | 1 | 2
 
 /**
  * Sweep and prune broadphase along one axis.
@@ -22,7 +25,7 @@ export class SAPBroadphase extends Broadphase {
    * Set to 0 for x axis, and 1 for y axis.
    * For best performance, pick the axis where bodies are most distributed.
    */
-  axisIndex: 0 | 1 | 2
+  axisIndex: AxisIndex
 
   private _addBodyHandler: (event: { body: Body }) => void
   private _removeBodyHandler: (event: { body: Body }) => void
@@ -30,7 +33,7 @@ export class SAPBroadphase extends Broadphase {
   /**
    * Check if the bounds of two bodies overlap, along the given SAP axis.
    */
-  static checkBounds(bi: Body, bj: Body, axisIndex: 0 | 1 | 2): boolean {
+  static checkBounds(bi: Body, bj: Body, axisIndex: AxisIndex): boolean {
     let biPos: number
     let bjPos: number
 
@@ -164,8 +167,6 @@ export class SAPBroadphase extends Broadphase {
     const bodies = this.axisList
     const N = bodies.length
     const axisIndex = this.axisIndex
-    let i
-    let j
 
     if (this.dirty) {
       this.sortList()
@@ -173,10 +174,10 @@ export class SAPBroadphase extends Broadphase {
     }
 
     // Look through the list
-    for (i = 0; i !== N; i++) {
+    for (let i = 0; i !== N; i++) {
       const bi = bodies[i]
 
-      for (j = i + 1; j < N; j++) {
+      for (let j = i + 1; j < N; j++) {
         const bj = bodies[j]
 
         if (!this.needBroadphaseCollision(bi, bj)) {
@@ -273,28 +274,12 @@ export class SAPBroadphase extends Broadphase {
       this.dirty = false
     }
 
-    const axisIndex = this.axisIndex
-    let axis: 'x' | 'y' | 'z' = 'x'
-    if (axisIndex === 1) {
-      axis = 'y'
-    }
-    if (axisIndex === 2) {
-      axis = 'z'
-    }
-
     const axisList = this.axisList
-    const lower = aabb.lowerBound[axis]
-    const upper = aabb.upperBound[axis]
+
     for (let i = 0; i < axisList.length; i++) {
       const b = axisList[i]
-
-      if (b.aabbNeedsUpdate) {
-        b.updateAABB()
-      }
-
-      if (b.aabb.overlaps(aabb)) {
-        result.push(b)
-      }
+      if (b.aabbNeedsUpdate) b.updateAABB()
+      if (b.aabb.overlaps(aabb)) result.push(b)
     }
 
     return result

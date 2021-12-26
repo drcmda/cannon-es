@@ -3,6 +3,8 @@ import { NaiveBroadphase } from '../src/collision/NaiveBroadphase'
 import { Sphere } from '../src/shapes/Sphere'
 import { World } from '../src/world/World'
 
+import type { CollisionMatrixClass } from '../src/collision/CollisionMatrix'
+
 export type TestConfig = {
   positions: Array<[number, number, number]>
   colliding: {
@@ -67,19 +69,19 @@ const collisionMatrixConfigs: TestConfig[] = [
   },
 ]
 
-export function testCollisionMatrix(CollisionMatrix: any) {
+export function testCollisionMatrix(CM: CollisionMatrixClass) {
   for (let config_idx = 0; config_idx < collisionMatrixConfigs.length; config_idx++) {
     const test_config = collisionMatrixConfigs[config_idx]
 
     const world = new World()
     world.broadphase = new NaiveBroadphase()
-    world.collisionMatrix = new CollisionMatrix()
-    world.collisionMatrixPrevious = new CollisionMatrix()
+    world.collisionMatrix = new CM()
+    world.collisionMatrixPrevious = new CM()
 
     for (let position_idx = 0; position_idx < test_config.positions.length; position_idx++) {
       const body = new Body({ mass: 1 })
       body.addShape(new Sphere(1.1))
-      body.position.set.apply(body.position, test_config.positions[position_idx])
+      body.position.set(...test_config.positions[position_idx])
       world.addBody(body)
     }
 

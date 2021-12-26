@@ -1,4 +1,4 @@
-import type { Body } from '../objects/Body'
+import type { Body } from '../../objects/Body'
 
 /**
  * Collision "matrix".
@@ -8,11 +8,7 @@ export class ArrayCollisionMatrix {
   /**
    * The matrix storage.
    */
-  matrix: number[]
-
-  constructor() {
-    this.matrix = []
-  }
+  matrix: number[] = []
 
   /**
    * Get an element

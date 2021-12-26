@@ -6,7 +6,7 @@ export class Utils {
    * @return The modified options object.
    */
   static defaults(options: Record<string, any> = {}, defaults: Record<string, any>): Record<string, any> {
-    for (let key in defaults) {
+    for (const key in defaults) {
       if (!(key in options)) {
         options[key] = defaults[key]
       }

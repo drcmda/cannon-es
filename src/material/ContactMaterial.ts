@@ -1,21 +1,50 @@
-import { Utils } from '../utils/Utils'
-import type { Material } from '../material/Material'
+import type { Material } from './Material'
 
-export type ContactMaterialOptions = ConstructorParameters<typeof ContactMaterial>[2]
+export type ContactMaterialOptions = {
+  /**
+   * Friction coefficient.
+   * @default 0.3
+   */
+  friction?: number
+  /**
+   * Restitution coefficient.
+   * @default 0.3
+   */
+  restitution?: number
+  /**
+   * Stiffness of the produced contact equations.
+   * @default 1e7
+   */
+  contactEquationStiffness?: number
+  /**
+   * Relaxation time of the produced contact equations.
+   * @default 3
+   */
+  contactEquationRelaxation?: number
+  /**
+   * Stiffness of the produced friction equations.
+   * @default 1e7
+   */
+  frictionEquationStiffness?: number
+  /**
+   * Relaxation time of the produced friction equations
+   * @default 3
+   */
+  frictionEquationRelaxation?: number
+}
 
 /**
  * Defines what happens when two materials meet.
- * @todo Refactor materials to materialA and materialB
  */
 export class ContactMaterial {
   /**
-   * Identifier of this material.
+   * Identifier of this ContactMaterial.
    */
   id: number
   /**
    * Participating materials.
    */
-  materials: [Material, Material]
+  materials: [materialA: Material, materialB: Material]
   /**
    * Friction coefficient.
    * @default 0.3
@@ -50,57 +79,24 @@ export class ContactMaterial {
   static idCounter = 0
 
   constructor(
-    m1: Material,
-    m2: Material,
-    options: {
-      /**
-       * Friction coefficient.
-       * @default 0.3
-       */
-      friction?: number
-      /**
-       * Restitution coefficient.
-       * @default 0.3
-       */
-      restitution?: number
-      /**
-       * Stiffness of the produced contact equations.
-       * @default 1e7
-       */
-      contactEquationStiffness?: number
-      /**
-       * Relaxation time of the produced contact equations.
-       * @default 3
-       */
-      contactEquationRelaxation?: number
-      /**
-       * Stiffness of the produced friction equations.
-       * @default 1e7
-       */
-      frictionEquationStiffness?: number
-      /**
-       * Relaxation time of the produced friction equations
-       * @default 3
-       */
-      frictionEquationRelaxation?: number
-    }
+    materialA: Material,
+    materialB: Material,
+    {
+      friction = 0.3,
+      restitution = 0.3,
+      contactEquationStiffness = 1e7,
+      contactEquationRelaxation = 3,
+      frictionEquationStiffness = 1e7,
+      frictionEquationRelaxation = 3,
+    }: ContactMaterialOptions = {}
   ) {
-    options = Utils.defaults(options, {
-      friction: 0.3,
-      restitution: 0.3,
-      contactEquationStiffness: 1e7,
-      contactEquationRelaxation: 3,
-      frictionEquationStiffness: 1e7,
-      frictionEquationRelaxation: 3,
-    })
-
     this.id = ContactMaterial.idCounter++
-    this.materials = [m1, m2]
-    this.friction = options.friction!
-    this.restitution = options.restitution!
-    this.contactEquationStiffness = options.contactEquationStiffness!
-    this.contactEquationRelaxation = options.contactEquationRelaxation!
-    this.frictionEquationStiffness = options.frictionEquationStiffness!
-    this.frictionEquationRelaxation = options.frictionEquationRelaxation!
+    this.materials = [materialA, materialB]
+    this.friction = friction
+    this.restitution = restitution
+    this.contactEquationStiffness = contactEquationStiffness
+    this.contactEquationRelaxation = contactEquationRelaxation
+    this.frictionEquationStiffness = frictionEquationStiffness
+    this.frictionEquationRelaxation = frictionEquationRelaxation
   }
 }

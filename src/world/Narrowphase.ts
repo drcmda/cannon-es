@@ -8,14 +8,15 @@ import { Ray } from '../collision/Ray'
 import { Vec3Pool } from '../utils/Vec3Pool'
 import { ContactEquation } from '../equations/ContactEquation'
 import { FrictionEquation } from '../equations/FrictionEquation'
+
 import type { Box } from '../shapes/Box'
-import type { Sphere } from '../shapes/Sphere'
 import type { ConvexPolyhedron, ConvexPolyhedronContactPoint } from '../shapes/ConvexPolyhedron'
+import type { Cylinder } from '../shapes/Cylinder'
+import type { Heightfield } from '../shapes/Heightfield'
 import type { Particle } from '../shapes/Particle'
 import type { Plane } from '../shapes/Plane'
+import type { Sphere } from '../shapes/Sphere'
 import type { Trimesh } from '../shapes/Trimesh'
-import type { Heightfield } from '../shapes/Heightfield'
-import { Cylinder } from '../shapes/Cylinder'
 import type { ContactMaterial } from '../material/ContactMaterial'
 import type { World } from '../world/World'
 
@@ -150,9 +151,6 @@ export class Narrowphase {
   get [COLLISION_TYPES.planeTrimesh]() {
     return this.planeTrimesh
   }
-  // get [COLLISION_TYPES.convexTrimesh]() {
-  //   return this.convexTrimesh
-  // }
 
   constructor(world: World) {
     this.contactPointPool = []
@@ -281,7 +279,7 @@ export class Narrowphase {
     averageContactPointB.setZero()
 
     const bodyA = c.bi
-    const bodyB = c.bj
+
     for (let i = 0; i !== numContacts; i++) {
       c = this.result[this.result.length - 1 - i]
       if (c.bi !== bodyA) {
@@ -339,10 +337,7 @@ export class Narrowphase {
       const bj = p2[k]
 
       // Get contact material
-      let bodyContactMaterial = null
-      if (bi.material && bj.material) {
-        bodyContactMaterial = world.getContactMaterial(bi.material, bj.material) || null
-      }
+      const bodyContactMaterial = bi.material && bj.material ? world.getContactMaterial(bi.material, bj.material) : null
 
       const justTest =
         (bi.type & Body.KINEMATIC && bj.type & Body.STATIC) ||
@@ -371,10 +366,8 @@ export class Narrowphase {
           }
 
           // Get collision material
-          let shapeContactMaterial = null
-          if (si.material && sj.material) {
-            shapeContactMaterial = world.getContactMaterial(si.material, sj.material) || null
-          }
+          const shapeContactMaterial =
+            si.material && sj.material ? world.getContactMaterial(si.material, sj.material) : null
 
           this.currentContactMaterial = shapeContactMaterial || bodyContactMaterial || world.defaultContactMaterial
 
@@ -417,9 +410,7 @@ export class Narrowphase {
     rsj?: Shape | null,
     justTest?: boolean
   ): boolean | void {
-    if (justTest) {
-      return xi.distanceSquared(xj) < (si.radius + sj.radius) ** 2
-    }
+    if (justTest) return xi.distanceSquared(xj) < (si.radius + sj.radius) ** 2
 
     // We will have only one contact in this case
     const contactEq = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
@@ -476,9 +467,7 @@ export class Narrowphase {
     point_on_plane_to_sphere.vsub(plane_to_sphere_ortho, r.rj) // The sphere position projected to plane
 
     if (-point_on_plane_to_sphere.dot(r.ni) <= si.radius) {
-      if (justTest) {
-        return true
-      }
+      if (justTest) return true
 
       // Make it relative to the body
       const ri = r.ri
@@ -545,7 +534,6 @@ export class Narrowphase {
     xi.vsub(xj, box_to_sphere)
     sj.getSideNormals(sides, qj)
     const R = si.radius
-    const penetrating_sides = []
 
     // Check side (plane) intersections
     let found = false
@@ -594,9 +582,7 @@ export class Narrowphase {
             side_ns2.copy(ns2)
             side_penetrations++
 
-            if (justTest) {
-              return true
-            }
+            if (justTest) return true
           }
         }
       }
@@ -651,9 +637,8 @@ export class Narrowphase {
           sphere_to_corner.vsub(xi, sphere_to_corner)
 
           if (sphere_to_corner.lengthSquared() < R * R) {
-            if (justTest) {
-              return true
-            }
+            if (justTest) return true
+
             found = true
             const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
             r.ri.copy(sphere_to_corner)
@@ -714,9 +699,8 @@ export class Narrowphase {
           const ndist = dist.length()
 
           if (tdist < sides[l].length() && ndist < R) {
-            if (justTest) {
-              return true
-            }
+            if (justTest) return true
+
             found = true
             const res = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
             edgeCenter.vadd(orthogonal, res.rj) // box rj
@@ -791,9 +775,8 @@ export class Narrowphase {
       si.clipAgainstHull(xi, qi, sj, xj, qj, sepAxis, -100, 100, res)
       let numContacts = 0
       for (let j = 0; j !== res.length; j++) {
-        if (justTest) {
-          return true
-        }
+        if (justTest) return true
+
         const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
         const ri = r.ri
         const rj = r.rj
@@ -844,11 +827,7 @@ export class Narrowphase {
     const faces = sj.faces
     const verts = sj.vertices
     const R = si.radius
-    const penetrating_sides = []
 
-    // if(convex_to_sphere.lengthSquared() > si.boundingSphereRadius + sj.boundingSphereRadius){
-    //     return;
-    // }
     let found = false
 
     // Check corners
@@ -862,9 +841,8 @@ export class Narrowphase {
       const sphere_to_corner = sphereConvex_sphereToCorner
       worldCorner.vsub(xi, sphere_to_corner)
       if (sphere_to_corner.lengthSquared() < R * R) {
-        if (justTest) {
-          return true
-        }
+        if (justTest) return true
+
         found = true
         const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
         r.ri.copy(sphere_to_corner)
@@ -928,9 +906,8 @@ export class Narrowphase {
 
         if (pointInPolygon(faceVerts, worldNormal, xi)) {
           // Is the sphere center in the face polygon?
-          if (justTest) {
-            return true
-          }
+          if (justTest) return true
+
           found = true
           const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
 
@@ -1003,9 +980,8 @@ export class Narrowphase {
             if (dot > 0 && dot * dot < edge.lengthSquared() && xi_to_p.lengthSquared() < R * R) {
               // Collision if the edge-sphere distance is less than the radius
               // Edge contact!
-              if (justTest) {
-                return true
-              }
+              if (justTest) return true
+
               const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
               p.vsub(xj, r.rj)
 
@@ -1086,9 +1062,7 @@ export class Narrowphase {
 
       const dot = worldNormal.dot(relpos)
       if (dot <= 0.0) {
-        if (justTest) {
-          return true
-        }
+        if (justTest) return true
 
         const r = this.createContactEquation(planeBody, convexBody, planeShape, convexShape, si, sj)
 
@@ -1274,12 +1248,6 @@ export class Narrowphase {
         if (numContacts > 2) {
           return
         }
-        /*
-          // Skip all but 1
-          for (let k = 0; k < numContacts - 1; k++) {
-              result.pop();
-          }
-        */
       }
     }
   }
@@ -1456,9 +1424,8 @@ export class Narrowphase {
     const lengthSquared = normal.lengthSquared()
 
     if (lengthSquared <= sj.radius * sj.radius) {
-      if (justTest) {
-        return true
-      }
+      if (justTest) return true
+
       const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
       normal.normalize()
       r.rj.copy(normal)
@@ -1491,9 +1458,7 @@ export class Narrowphase {
     xi.vsub(bj.position, relpos)
     const dot = normal.dot(relpos)
     if (dot <= 0.0) {
-      if (justTest) {
-        return true
-      }
+      if (justTest) return true
 
       const r = this.createContactEquation(bi, bj, si, sj, rsi, rsj)
       r.ni.copy(normal) // Contact normal is the plane normal
@@ -1548,7 +1513,6 @@ export class Narrowphase {
     const penetratedFaceNormal = convexParticle_penetratedFaceNormal
     const worldPenetrationVec = convexParticle_worldPenetrationVec
     let minPenetration = null
-    let numDetectedFaces = 0
 
     // Convert particle position xi to local coords in the convex
     const local = convexParticle_local
@@ -1575,14 +1539,11 @@ export class Narrowphase {
         xi.vsub(verts[0], convexParticle_vertexToParticle)
         const penetration = -normal.dot(convexParticle_vertexToParticle)
         if (minPenetration === null || Math.abs(penetration) < Math.abs(minPenetration)) {
-          if (justTest) {
-            return true
-          }
+          if (justTest) return true
 
           minPenetration = penetration
           penetratedFaceIndex = i
           penetratedFaceNormal.copy(normal)
-          numDetectedFaces++
         }
       }
 
@@ -1595,8 +1556,6 @@ export class Narrowphase {
         worldPenetrationVec.vadd(xi, worldPenetrationVec)
         worldPenetrationVec.vsub(xj, worldPenetrationVec)
         r.rj.copy(worldPenetrationVec)
-        //const projectedToFace = xi.vsub(xj).vadd(worldPenetrationVec);
-        //projectedToFace.copy(r.rj);
 
         //qj.vmult(r.rj,r.rj);
         penetratedFaceNormal.negate(r.ni) // Contact normal
@@ -1723,11 +1682,9 @@ export class Narrowphase {
 
           v.vsub(spherePos, relpos)
 
-          if (justTest) {
-            return true
-          }
+          if (justTest) return true
 
-          let r = this.createContactEquation(sphereBody, trimeshBody, sphereShape, trimeshShape, rsi, rsj)
+          const r = this.createContactEquation(sphereBody, trimeshBody, sphereShape, trimeshShape, rsi, rsj)
           r.ni.copy(relpos)
           r.ni.normalize()
 
@@ -1775,9 +1732,7 @@ export class Narrowphase {
           // tmp is now the sphere center position projected to the edge, defined locally in the trimesh frame
           const dist = tmp.distanceTo(localSpherePos)
           if (dist < sphereShape.radius) {
-            if (justTest) {
-              return true
-            }
+            if (justTest) return true
 
             const r = this.createContactEquation(sphereBody, trimeshBody, sphereShape, trimeshShape, rsi, rsj)
 
@@ -1816,10 +1771,9 @@ export class Narrowphase {
       // tmp is now the sphere position projected to the triangle plane
       dist = tmp.distanceTo(localSpherePos)
       if (Ray.pointInTriangle(tmp, va, vb, vc) && dist < sphereShape.radius) {
-        if (justTest) {
-          return true
-        }
-        let r = this.createContactEquation(sphereBody, trimeshBody, sphereShape, trimeshShape, rsi, rsj)
+        if (justTest) return true
+
+        const r = this.createContactEquation(sphereBody, trimeshBody, sphereShape, trimeshShape, rsi, rsj)
 
         tmp.vsub(localSpherePos, r.ni)
         r.ni.normalize()
@@ -1876,9 +1830,7 @@ export class Narrowphase {
       const dot = normal.dot(relpos)
 
       if (dot <= 0.0) {
-        if (justTest) {
-          return true
-        }
+        if (justTest) return true
 
         const r = this.createContactEquation(planeBody, trimeshBody, planeShape, trimeshShape, rsi, rsj)
 
@@ -1902,77 +1854,6 @@ export class Narrowphase {
       }
     }
   }
-
-  // convexTrimesh(
-  //   si: ConvexPolyhedron, sj: Trimesh, xi: Vec3, xj: Vec3, qi: Quaternion, qj: Quaternion,
-  //   bi: Body, bj: Body, rsi?: Shape | null, rsj?: Shape | null,
-  //   faceListA?: number[] | null, faceListB?: number[] | null,
-  // ) {
-  //   const sepAxis = convexConvex_sepAxis;
-
-  //   if(xi.distanceTo(xj) > si.boundingSphereRadius + sj.boundingSphereRadius){
-  //       return;
-  //   }
-
-  //   // Construct a temp hull for each triangle
-  //   const hullB = new ConvexPolyhedron();
-
-  //   hullB.faces = [[0,1,2]];
-  //   const va = new Vec3();
-  //   const vb = new Vec3();
-  //   const vc = new Vec3();
-  //   hullB.vertices = [
-  //       va,
-  //       vb,
-  //       vc
-  //   ];
-
-  //   for (let i = 0; i < sj.indices.length / 3; i++) {
-
-  //       const triangleNormal = new Vec3();
-  //       sj.getNormal(i, triangleNormal);
-  //       hullB.faceNormals = [triangleNormal];
-
-  //       sj.getTriangleVertices(i, va, vb, vc);
-
-  //       let d = si.testSepAxis(triangleNormal, hullB, xi, qi, xj, qj);
-  //       if(!d){
-  //           triangleNormal.scale(-1, triangleNormal);
-  //           d = si.testSepAxis(triangleNormal, hullB, xi, qi, xj, qj);
-
-  //           if(!d){
-  //               continue;
-  //           }
-  //       }
-
-  //       const res: ConvexPolyhedronContactPoint[] = [];
-  //       const q = convexConvex_q;
-  //       si.clipAgainstHull(xi,qi,hullB,xj,qj,triangleNormal,-100,100,res);
-  //       for(let j = 0; j !== res.length; j++){
-  //           const r = this.createContactEquation(bi,bj,si,sj,rsi,rsj),
-  //               ri = r.ri,
-  //               rj = r.rj;
-  //           r.ni.copy(triangleNormal);
-  //           r.ni.negate(r.ni);
-  //           res[j].normal.negate(q);
-  //           q.mult(res[j].depth, q);
-  //           res[j].point.vadd(q, ri);
-  //           rj.copy(res[j].point);
-
-  //           // Contact points are in world coordinates. Transform back to relative
-  //           ri.vsub(xi,ri);
-  //           rj.vsub(xj,rj);
-
-  //           // Make relative to bodies
-  //           ri.vadd(xi, ri);
-  //           ri.vsub(bi.position, ri);
-  //           rj.vadd(xj, rj);
-  //           rj.vsub(bj.position, rj);
-
-  //           result.push(r);
-  //       }
-  //   }
-  // }
 }
 
 const averageNormal = new Vec3()
@@ -1984,24 +1865,12 @@ const tmpVec2 = new Vec3()
 const tmpQuat1 = new Quaternion()
 const tmpQuat2 = new Quaternion()
 
-let numWarnings = 0
-const maxWarnings = 10
-
-function warn(msg: string): void {
-  if (numWarnings > maxWarnings) {
-    return
-  }
-  numWarnings++
-  console.warn(msg)
-}
-
 const planeTrimesh_normal = new Vec3()
 const planeTrimesh_relpos = new Vec3()
 const planeTrimesh_projected = new Vec3()
 
 const sphereTrimesh_normal = new Vec3()
 const sphereTrimesh_relpos = new Vec3()
-const sphereTrimesh_projected = new Vec3()
 const sphereTrimesh_v = new Vec3()
 const sphereTrimesh_v2 = new Vec3()
 const sphereTrimesh_edgeVertexA = new Vec3()
@@ -2081,9 +1950,6 @@ const sphereConvex_worldSpherePointClosestToPlane = new Vec3()
 const sphereConvex_penetrationVec = new Vec3()
 const sphereConvex_sphereToWorldPoint = new Vec3()
 
-const planeBox_normal = new Vec3()
-const plane_to_corner = new Vec3()
-
 const planeConvex_v = new Vec3()
 const planeConvex_normal = new Vec3()
 const planeConvex_relpos = new Vec3()
@@ -2098,10 +1964,8 @@ const particlePlane_projected = new Vec3()
 
 const particleSphere_normal = new Vec3()
 
-// WIP
 const cqj = new Quaternion()
 const convexParticle_local = new Vec3()
-const convexParticle_normal = new Vec3()
 const convexParticle_penetratedFaceNormal = new Vec3()
 const convexParticle_vertexToParticle = new Vec3()
 const convexParticle_worldPenetrationVec = new Vec3()

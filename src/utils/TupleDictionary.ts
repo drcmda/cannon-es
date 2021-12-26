@@ -1,44 +1,25 @@
-/**
- * TupleDictionary
- */
-export class TupleDictionary {
-  data: { [id: string]: any; keys: string[] } = { keys: [] }
+const getKey = (i: number, j: number) => (i < j ? `${i}-${j}` : `${j}-${i}`)
+export class TupleDictionary<T> {
+  data: { [key: string]: T }
+  keys: string[]
 
-  /** get */
-  get(i: number, j: number): any {
-    if (i > j) {
-      // swap
-      const temp = j
-      j = i
-      i = temp
-    }
-    return this.data[`${i}-${j}`]
+  constructor() {
+    this.data = {}
+    this.keys = []
   }
 
-  /** set */
-  set(i: number, j: number, value: any): void {
-    if (i > j) {
-      const temp = j
-      j = i
-      i = temp
-    }
-    const key = `${i}-${j}`
+  get = (i: number, j: number): T => this.data[getKey(i, j)]
 
-    // Check if key already exists
-    if (!this.get(i, j)) {
-      this.data.keys.push(key)
-    }
+  set(i: number, j: number, value: T): void {
+    const key = getKey(i, j)
+
+    if (!this.keys.includes(key)) this.keys.push(key)
 
     this.data[key] = value
   }
 
-  /** reset */
   reset(): void {
-    const data = this.data
-    const keys = data.keys
-    while (keys.length > 0) {
-      const key = keys.pop()!
-      delete data[key]
-    }
+    this.data = {}
+    this.keys = []
   }
 }

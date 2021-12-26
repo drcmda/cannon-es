@@ -1,11 +1,8 @@
-import type { Shape } from '../shapes/Shape'
 import { Vec3 } from '../math/Vec3'
-import { Box } from '../shapes/Box'
 import { Sphere } from '../shapes/Sphere'
 import { Body } from '../objects/Body'
 import { World } from '../world/World'
-import { ArrayCollisionMatrix } from '../collision/ArrayCollisionMatrix'
-import { ObjectCollisionMatrix } from '../collision/ObjectCollisionMatrix'
+import { ArrayCollisionMatrix, ObjectCollisionMatrix } from '../collision/CollisionMatrix'
 import { RaycastResult } from '../collision/RaycastResult'
 import { testCollisionMatrix } from '../../test/helpers'
 
@@ -21,38 +18,6 @@ describe('World', () => {
 
     expect(body.force.almostEquals(new Vec3(0, 0, 0))).toBe(true)
     expect(body.torque.almostEquals(new Vec3(0, 0, 0))).toBe(true)
-  })
-
-  test('rayTestBox', () => {
-    const world = new World()
-
-    const body = new Body()
-    body.addShape(new Box(new Vec3(1, 1, 1)))
-    world.addBody(body)
-
-    const from = new Vec3(-10, 0, 0)
-    const to = new Vec3(10, 0, 0)
-
-    const result = new RaycastResult()
-    world.rayTest(from, to, result)
-
-    expect(result.hasHit).toBe(true)
-  })
-
-  test('rayTestSphere', () => {
-    const world = new World()
-
-    const body = new Body()
-    body.addShape(new Sphere(1))
-    world.addBody(body)
-
-    const from = new Vec3(-10, 0, 0)
-    const to = new Vec3(10, 0, 0)
-
-    const result = new RaycastResult()
-    world.rayTest(from, to, result)
-
-    expect(result.hasHit).toBe(true)
   })
 
   test('raycastClosest: single', () => {

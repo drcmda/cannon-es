@@ -1,8 +1,7 @@
 import { AABB } from './AABB'
-import { Ray } from './Ray'
-import { Vec3 } from '../math/Vec3'
 import { Quaternion } from '../math/Quaternion'
 import { Transform } from '../math/Transform'
+import { Vec3 } from '../math/Vec3'
 
 describe('AABB', () => {
   test('construct', () => {

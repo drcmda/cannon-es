@@ -1,23 +1,46 @@
+type EventType =
+  | 'addBody'
+  | 'beginContact'
+  | 'beginShapeContact'
+  | 'collide'
+  | 'endContact'
+  | 'endShapeContact'
+  | 'removeBody'
+  | 'postStep'
+  | 'preStep'
+  | 'sleep'
+  | 'sleepy'
+  | 'wakeup'
+
+type CannonEvent = { type: EventType; target?: EventTarget }
+type EventHandler = (event: CannonEvent) => void
+
 /**
  * Base class for objects that dispatches events.
  */
 export class EventTarget {
-  private _listeners: Record<string, Function[]> | undefined
+  private _listeners: Record<EventType, EventHandler[]> = {
+    addBody: [],
+    beginContact: [],
+    beginShapeContact: [],
+    collide: [],
+    endContact: [],
+    endShapeContact: [],
+    removeBody: [],
+    postStep: [],
+    preStep: [],
+    sleep: [],
+    sleepy: [],
+    wakeup: [],
+  }
 
   /**
    * Add an event listener
    * @return The self object, for chainability.
    */
-  addEventListener(type: string, listener: Function): EventTarget {
-    if (this._listeners === undefined) {
-      this._listeners = {}
-    }
-    const listeners = this._listeners
-    if (listeners[type] === undefined) {
-      listeners[type] = []
-    }
-    if (!listeners[type].includes(listener)) {
-      listeners[type].push(listener)
+  addEventListener(type: EventType, listener: EventHandler): EventTarget {
+    if (!this._listeners[type].includes(listener)) {
+      this._listeners[type].push(listener)
     }
     return this
   }
@@ -25,43 +48,25 @@ export class EventTarget {
   /**
    * Check if an event listener is added
    */
-  hasEventListener(type: string, listener: Function): boolean {
-    if (this._listeners === undefined) {
-      return false
-    }
-    const listeners = this._listeners
-    if (listeners[type] !== undefined && listeners[type].includes(listener)) {
-      return true
-    }
-    return false
+  hasEventListener(type: EventType, listener: EventHandler): boolean {
+    return this._listeners[type].includes(listener)
   }
 
   /**
    * Check if any event listener of the given type is added
    */
-  hasAnyEventListener(type: string): boolean {
-    if (this._listeners === undefined) {
-      return false
-    }
-    const listeners = this._listeners
-    return listeners[type] !== undefined
+  hasAnyEventListener(type: EventType): boolean {
+    return !!this._listeners[type].length
   }
 
   /**
    * Remove an event listener
    * @return The self object, for chainability.
    */
-  removeEventListener(type: string, listener: Function): EventTarget {
-    if (this._listeners === undefined) {
-      return this
-    }
-    const listeners = this._listeners
-    if (listeners[type] === undefined) {
-      return this
-    }
-    const index = listeners[type].indexOf(listener)
+  removeEventListener(type: EventType, listener: EventHandler): EventTarget {
+    const index = this._listeners[type].indexOf(listener)
     if (index !== -1) {
-      listeners[type].splice(index, 1)
+      this._listeners[type].splice(index, 1)
     }
     return this
   }
@@ -70,17 +75,10 @@ export class EventTarget {
    * Emit an event.
    * @return The self object, for chainability.
    */
-  dispatchEvent(event: any): EventTarget {
-    if (this._listeners === undefined) {
-      return this
-    }
-    const listeners = this._listeners
-    const listenerArray = listeners[event.type]
-    if (listenerArray !== undefined) {
-      event.target = this
-      for (let i = 0, l = listenerArray.length; i < l; i++) {
-        listenerArray[i].call(this, event)
-      }
+  dispatchEvent(event: CannonEvent): EventTarget {
+    event.target = this
+    for (let i = 0; i < this._listeners[event.type].length; i += 1) {
+      this._listeners[event.type][i].call(this, event)
     }
     return this
   }

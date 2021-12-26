@@ -1,6 +1,8 @@
+import type { AABB } from './AABB'
 import { Broadphase } from '../collision/Broadphase'
 import { Vec3 } from '../math/Vec3'
 import { Shape } from '../shapes/Shape'
+
 import type { Body } from '../objects/Body'
 import type { Sphere } from '../shapes/Sphere'
 import type { Plane } from '../shapes/Plane'
@@ -77,8 +79,6 @@ export class GridBroadphase extends Broadphase {
    * Get all the collision pairs in the physics world
    */
   collisionPairs(world: World, pairs1: Body[], pairs2: Body[]): void {
-    const N = world.numObjects()
-    const bodies = world.bodies
     const max = this.aabbMax
     const min = this.aabbMin
     const nx = this.nx
@@ -104,12 +104,8 @@ export class GridBroadphase extends Broadphase {
 
     const binRadius = Math.sqrt(binsizeX * binsizeX + binsizeY * binsizeY + binsizeZ * binsizeZ) * 0.5
 
-    const types = Shape.types
-    const SPHERE = types.SPHERE
-    const PLANE = types.PLANE
-    const BOX = types.BOX
-    const COMPOUND = types.COMPOUND
-    const CONVEXPOLYHEDRON = types.CONVEXPOLYHEDRON
+    const SPHERE = Shape.types.SPHERE
+    const PLANE = Shape.types.PLANE
     const bins = this.bins
     const binLengths = this.binLengths
     const Nbins = this.bins.length
@@ -178,8 +174,8 @@ export class GridBroadphase extends Broadphase {
     }
 
     // Put all bodies into the bins
-    for (let i = 0; i !== N; i++) {
-      const bi = bodies[i]
+    for (let i = 0; i !== world.bodies.length; i++) {
+      const bi = world.bodies[i]
       const si = bi.shapes[0]
 
       switch (si.type) {
@@ -264,21 +260,15 @@ export class GridBroadphase extends Broadphase {
       }
     }
 
-    //	for (let zi = 0, zoff=0; zi < nz; zi++, zoff+= zstep) {
-    //		console.log("layer "+zi);
-    //		for (let yi = 0, yoff=0; yi < ny; yi++, yoff += ystep) {
-    //			const row = '';
-    //			for (let xi = 0, xoff=0; xi < nx; xi++, xoff += xstep) {
-    //				const idx = xoff + yoff + zoff;
-    //				row += ' ' + binLengths[idx];
-    //			}
-    //			console.log(row);
-    //		}
-    //	}
-
     this.makePairsUnique(pairs1, pairs2)
+  }
+
+  aabbQuery(world: World, aabb: AABB, result: Body[] = []): Body[] {
+    return result
+  }
+  setWorld() {
+    /**/
   }
 }
 
 const GridBroadphase_collisionPairs_d = new Vec3()
-const GridBroadphase_collisionPairs_binPos = new Vec3()
