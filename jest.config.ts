@@ -1,7 +1,7 @@
-const tsPreset = require('ts-jest/jest-preset')
+import { defaults } from 'ts-jest/presets'
 
-module.exports = {
-  ...tsPreset,
+export default {
+  ...defaults,
   testPathIgnorePatterns: ['/node_modules/'],
   setupFilesAfterEnv: ['./test/customMatchers.ts'],
 }
