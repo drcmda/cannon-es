@@ -28,7 +28,7 @@
     "prepublishOnly": "npm run build && npm run test",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false --strict",
     "typegen": "tsc --outFile dist/cannon-es.d.ts",
-    "generate-docs": "typedoc && node ./scripts/inject-css-in-docs.mjs",
+    "generate-docs": "typedoc",
     "test": "jest",
     "eslint": "eslint .",
     "eslint-fix": "eslint --fix .",

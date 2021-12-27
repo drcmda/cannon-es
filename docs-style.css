@@ -3,57 +3,54 @@ body {
     Segoe UI Emoji !important;
 }
 
+/* Disable header disappearing */
 .tsd-page-toolbar {
   transform: none !important;
 }
-
-.tsd-navigation {
-  top: 40px !important;
+.tsd-navigation.secondary {
+  top: calc(40px) !important;
   max-height: calc(100vh - 40px) !important;
-  padding-top: 2rem !important;
 }
 
-.tsd-navigation > ul > li:first-child {
-  margin-top: 0 !important;
+/* Adjust spacings */
+.tsd-navigation.primary {
+  padding-bottom: 0 !important;
+}
+.tsd-navigation.secondary > ul > li.tsd-kind-class:first-child:not(.current) {
+  margin-top: 20px;
 }
 
+/* Hide unnecessary filter */
 #tsd-filter-visibility {
   display: none !important;
 }
 
-#tsd-filter-only-exported,
-[for='tsd-filter-only-exported'] {
-  display: none !important;
+/* Hide "Class" text */
+.tsd-page-title .tsd-breadcrumb + h1 {
+  overflow: hidden;
+  text-indent: -90px;
 }
 
+/* Easier to read line-height */
 .tsd-typography p {
   line-height: 1.7;
 }
 
-.tsd-typography p a {
-  color: #0366d6;
-}
+/* GitHub styles for <pre> blocks */
+:root {
+  --light-hl-0: #d73a49; /* declarations */
+  --light-hl-1: #000000;
+  --light-hl-2: #0070c1;
+  --light-hl-3: #6442c1; /* names */
+  --light-hl-4: #24292e; /* variable names */
+  --light-hl-5: #098658;
+  --light-hl-6: #6a737d; /* comments */
+  --light-hl-7: #af00db;
+  --light-hl-8: #267f99;
+  --light-hl-9: #a31515;
+  --light-hl-10: #000000ff;
 
-pre {
-  background: #f6f8fa !important;
-}
+  --light-code-background: #f6f8fa;
 
-/* comments */
-pre span[style='color: #008000'] {
-  color: #6a737d !important;
-}
-
-/* names */
-pre span[style='color: #795E26'] {
-  color: #6442c1 !important;
-}
-
-/* declarations */
-pre span[style='color: #0000FF'] {
-  color: #d73a49 !important;
-}
-
-/* variable names */
-pre span[style='color: #001080'] {
-  color: #24292e !important;
+  --light-color-link: #0366d6;
 }
