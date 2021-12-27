@@ -30,10 +30,6 @@
     "typegen": "tsc --outFile dist/cannon-es.d.ts",
     "generate-docs": "typedoc",
     "test": "jest",
-    "eslint": "eslint .",
-    "eslint-fix": "eslint --fix .",
-    "prettier": "prettier --list-different .",
-    "prettier-fix": "prettier --write .",
     "prepare": "husky install"
   },
   "repository": {
@@ -54,10 +50,6 @@
     "@rollup/plugin-replace": "^3.0.0",
     "@types/jest": "^27.0.3",
     "@types/node": "^17.0.4",
-    "@typescript-eslint/eslint-plugin": "^5.8.0",
-    "@typescript-eslint/parser": "^5.8.0",
-    "eslint": "^8.5.0",
-    "eslint-config-prettier": "^8.3.0",
     "fs-extra": "^10.0.0",
     "husky": "^7.0.4",
     "jest": "^27.4.5",
