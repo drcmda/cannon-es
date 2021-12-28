@@ -39,7 +39,7 @@ export default [
       babel(babelOptions),
       replace({
         // Use node built-in performance.now in commonjs environments
-        'globalThis.performance': `require('perf_hooks').performance`,
+        'globalThis.performance': `require('perf_hooks') && require('perf_hooks').performance`,
       }),
       filesize(),
     ],
