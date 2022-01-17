@@ -127,18 +127,6 @@ export class Body extends EventTarget {
    */
   world: World | null
 
-  /**
-   * Callback function that is used BEFORE stepping the system. Use it to apply forces, for example. Inside the function, "this" will refer to this Body object. Deprecated - use World events instead.
-   * @deprecated Use World events instead
-   */
-  preStep: (() => void) | null
-
-  /**
-   * Callback function that is used AFTER stepping the system. Inside the function, "this" will refer to this Body object. Deprecated - use World events instead.
-   * @deprecated Use World events instead
-   */
-  postStep: (() => void) | null
-
   vlambda: Vec3
 
   /**
@@ -444,8 +432,6 @@ export class Body extends EventTarget {
     this.id = Body.idCounter++
     this.index = -1
     this.world = null
-    this.preStep = null
-    this.postStep = null
     this.vlambda = new Vec3()
 
     this.collisionFilterGroup = typeof options.collisionFilterGroup === 'number' ? options.collisionFilterGroup : 1

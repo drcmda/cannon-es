@@ -34,7 +34,7 @@
         const planet = new CANNON.Body({ mass: 0 })
         planet.addShape(planetShape)
 
-        moon.preStep = () => {
+        world.addEventListener('preStep', () => {
           const moon_to_planet = new CANNON.Vec3()
           moon.position.negate(moon_to_planet)
 
@@ -42,7 +42,7 @@
 
           moon_to_planet.normalize()
           moon_to_planet.scale(1500 / Math.pow(distance, 2), moon.force)
-        }
+        })
 
         world.addBody(moon)
         world.addBody(planet)

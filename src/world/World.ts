@@ -821,14 +821,6 @@ export class World extends EventTarget {
 
     this.dispatchEvent(World_step_preStepEvent)
 
-    // Invoke pre-step callbacks
-    for (i = 0; i !== N; i++) {
-      const bi = bodies[i]
-      if (bi.preStep) {
-        bi.preStep.call(bi)
-      }
-    }
-
     // Leap frog
     // vnew = v + h*f/m
     // xnew = x + h*vnew
@@ -854,15 +846,6 @@ export class World extends EventTarget {
     this.stepnumber += 1
 
     this.dispatchEvent(World_step_postStepEvent)
-
-    // Invoke post-step callbacks
-    for (i = 0; i !== N; i++) {
-      const bi = bodies[i]
-      const postStep = bi.postStep
-      if (postStep) {
-        postStep.call(bi)
-      }
-    }
 
     // Sleeping update
     let hasActiveBodies = true
