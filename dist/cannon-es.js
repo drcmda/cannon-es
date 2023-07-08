@@ -683,7 +683,7 @@ class Vec3 {
   }
   /**
    * Normalize the vector. Note that this changes the values in the vector.
-    * @return Returns the norm of the vector
+     * @return Returns the norm of the vector
    */
 
 
@@ -4584,7 +4584,7 @@ class RaycastResult {
    */
 
 
-  set(rayFromWorld, rayToWorld, hitNormalWorld, hitPointWorld, shape, body, distance) {
+  set(rayFromWorld, rayToWorld, hitNormalWorld, hitPointWorld, shape, body, distance, hitFaceIndex) {
     this.rayFromWorld.copy(rayFromWorld);
     this.rayToWorld.copy(rayToWorld);
     this.hitNormalWorld.copy(hitNormalWorld);
@@ -4592,6 +4592,7 @@ class RaycastResult {
     this.shape = shape;
     this.body = body;
     this.distance = distance;
+    this.hitFaceIndex = hitFaceIndex;
   }
 
 }
@@ -5200,12 +5201,10 @@ class Ray {
       return;
     }
 
-    result.hitFaceIndex = typeof hitFaceIndex !== 'undefined' ? hitFaceIndex : -1;
-
     switch (this.mode) {
       case Ray.ALL:
         this.hasHit = true;
-        result.set(from, to, normal, hitPointWorld, shape, body, distance);
+        result.set(from, to, normal, hitPointWorld, shape, body, distance, hitFaceIndex);
         result.hasHit = true;
         this.callback(result);
         break;
@@ -5215,7 +5214,7 @@ class Ray {
         if (distance < result.distance || !result.hasHit) {
           this.hasHit = true;
           result.hasHit = true;
-          result.set(from, to, normal, hitPointWorld, shape, body, distance);
+          result.set(from, to, normal, hitPointWorld, shape, body, distance, hitFaceIndex);
         }
 
         break;
@@ -5224,7 +5223,7 @@ class Ray {
         // Report and stop.
         this.hasHit = true;
         result.hasHit = true;
-        result.set(from, to, normal, hitPointWorld, shape, body, distance);
+        result.set(from, to, normal, hitPointWorld, shape, body, distance, hitFaceIndex);
         result.shouldStop = true;
         break;
     }
@@ -9685,7 +9684,7 @@ class Trimesh extends Shape {
         const n = this.vertices.length / 3,
             verts = this.vertices;
         const minx,miny,minz,maxx,maxy,maxz;
-         const v = tempWorldVertex;
+          const v = tempWorldVertex;
         for(let i=0; i<n; i++){
             this.getVertex(i, v);
             quat.vmult(v, v);
@@ -9695,12 +9694,12 @@ class Trimesh extends Shape {
             } else if(v.x > maxx || maxx===undefined){
                 maxx = v.x;
             }
-             if (v.y < miny || miny===undefined){
+              if (v.y < miny || miny===undefined){
                 miny = v.y;
             } else if(v.y > maxy || maxy===undefined){
                 maxy = v.y;
             }
-             if (v.z < minz || minz===undefined){
+              if (v.z < minz || minz===undefined){
                 minz = v.z;
             } else if(v.z > maxz || maxz===undefined){
                 maxz = v.z;

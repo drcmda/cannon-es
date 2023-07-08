@@ -93,7 +93,8 @@ export class RaycastResult {
     hitPointWorld: Vec3,
     shape: Shape,
     body: Body,
-    distance: number
+    distance: number,
+    hitFaceIndex: number
   ): void {
     this.rayFromWorld.copy(rayFromWorld)
     this.rayToWorld.copy(rayToWorld)
@@ -102,5 +103,6 @@ export class RaycastResult {
     this.shape = shape
     this.body = body
     this.distance = distance
+    this.hitFaceIndex = hitFaceIndex
   }
 }

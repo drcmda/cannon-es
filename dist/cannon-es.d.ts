@@ -206,7 +206,7 @@ declare module "collision/RaycastResult" {
         constructor();
         reset(): void;
         abort(): void;
-        set(rayFromWorld: Vec3, rayToWorld: Vec3, hitNormalWorld: Vec3, hitPointWorld: Vec3, shape: Shape, body: Body, distance: number): void;
+        set(rayFromWorld: Vec3, rayToWorld: Vec3, hitNormalWorld: Vec3, hitPointWorld: Vec3, shape: Shape, body: Body, distance: number, hitFaceIndex: number): void;
     }
 }
 declare module "shapes/Sphere" {
