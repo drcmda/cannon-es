@@ -80,7 +80,7 @@ export class World extends EventTarget {
   gravity: Vec3
 
   /**
-   * Gravity to use when approximating the friction max force (mu*mass*gravity).
+   * Gravity to use when approximating the friction max force (mu \* mass \* gravity).
    * If undefined, global gravity will be used.
    * Use to enable friction in a World with a null gravity vector (no gravity).
    */

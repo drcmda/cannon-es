@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>cannon.js - frictionGravity demo</title>
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  </head>
+  <body>
+    <script type="module">
+      import * as CANNON from '../dist/cannon-es.js'
+      import { Demo } from './js/Demo.js'
+
+      /**
+       * Demonstrates how to use frictionGravity to have correct friction with a null gravity vector.
+       */
+
+      const demo = new Demo()
+
+      let boxBody1
+      let boxBody2
+
+      function setupScene(world) {
+        const size = 1.0
+
+        // Static ground plane
+        const groundMaterial = new CANNON.Material('ground')
+        const groundShape = new CANNON.Plane()
+        const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial })
+        groundBody.addShape(groundShape)
+        groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+        world.addBody(groundBody)
+        demo.addVisual(groundBody)
+
+        // Create a slippery material (friction coefficient = 0.0)
+        const slipperyMaterial = new CANNON.Material('slippery')
+
+        // Create slippery box
+        const boxShape = new CANNON.Box(new CANNON.Vec3(size, size, size))
+        boxBody1 = new CANNON.Body({ mass: 1, material: slipperyMaterial })
+        boxBody1.addShape(boxShape)
+        boxBody1.position.set(0, 5, 0)
+        world.addBody(boxBody1)
+        demo.addVisual(boxBody1)
+
+        // Create box made of groundMaterial
+        boxBody2 = new CANNON.Body({ mass: 10, material: groundMaterial })
+        boxBody2.addShape(boxShape)
+        boxBody2.position.set(-size * 4, 5, 0)
+        world.addBody(boxBody2)
+        demo.addVisual(boxBody2)
+
+        // Adjust constraint equation parameters for ground/ground contact
+        const ground_ground = new CANNON.ContactMaterial(groundMaterial, groundMaterial, {
+          friction: 0.4,
+          restitution: 0.3,
+          contactEquationStiffness: 1e8,
+          contactEquationRelaxation: 3,
+          frictionEquationStiffness: 1e8,
+          frictionEquationRegularizationTime: 3,
+        })
+
+        // Add contact material to the world
+        world.addContactMaterial(ground_ground)
+
+        // The ContactMaterial defines what happens when two materials meet.
+        // In this case we want friction coefficient = 0.0 when the slippery material touches ground.
+        const slippery_ground = new CANNON.ContactMaterial(groundMaterial, slipperyMaterial, {
+          friction: 0,
+          restitution: 0.3,
+          contactEquationStiffness: 1e8,
+          contactEquationRelaxation: 3,
+        })
+
+        // We must add the contact materials to the world
+        world.addContactMaterial(slippery_ground)
+      }
+
+      // Scene with frictionGravity set
+      demo.addScene('Friction Gravity Set', () => {
+        const world = demo.getWorld()
+        world.gravity.set(0, 0, 0)
+        world.frictionGravity = new CANNON.Vec3(3, -60, 0)
+
+        setupScene(world)
+      })
+
+      // Scene with frictionGravity unset
+      demo.addScene('Friction Gravity Unset', () => {
+        const world = demo.getWorld()
+        world.gravity.set(0, 0, 0)
+        world.frictionGravity = undefined
+        
+        setupScene(world)
+      })
+
+      demo.start()
+
+      // apply "gravity" forces manually
+      const gravityForce = new CANNON.Vec3(3, -60, 0)
+      setInterval(() => {
+        boxBody1.applyForce(gravityForce)
+        boxBody2.applyForce(gravityForce)
+      }, 1 / 60)
+    </script>
+  </body>
+</html>
