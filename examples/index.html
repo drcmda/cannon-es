@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script>
+			const href = location.href.split('/');
+			while(href.includes('examples')){
+				href.pop();
+			}
+			window.location.replace(href.join('/'));
+		</script>
+	</head>
+</html>
