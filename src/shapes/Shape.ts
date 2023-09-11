@@ -30,7 +30,7 @@ export const SHAPE_TYPES = {
 /**
  * ShapeType
  */
-export type ShapeType = typeof SHAPE_TYPES[keyof typeof SHAPE_TYPES]
+export type ShapeType = (typeof SHAPE_TYPES)[keyof typeof SHAPE_TYPES]
 
 export type ShapeOptions = ConstructorParameters<typeof Shape>[0]
 
@@ -60,7 +60,7 @@ export class Shape {
   collisionResponse: boolean
 
   /**
-   * @default 1
+   * @default -1
    */
   collisionFilterGroup: number
 
@@ -98,7 +98,7 @@ export class Shape {
        */
       collisionResponse?: boolean
       /**
-       * @default 1
+       * @default -1
        */
       collisionFilterGroup?: number
       /**
@@ -117,7 +117,7 @@ export class Shape {
     this.type = options.type || 0
     this.boundingSphereRadius = 0
     this.collisionResponse = options.collisionResponse ? options.collisionResponse : true
-    this.collisionFilterGroup = options.collisionFilterGroup !== undefined ? options.collisionFilterGroup : 1
+    this.collisionFilterGroup = options.collisionFilterGroup !== undefined ? options.collisionFilterGroup : -1
     this.collisionFilterMask = options.collisionFilterMask !== undefined ? options.collisionFilterMask : -1
     this.material = options.material ? options.material : null
     this.body = null

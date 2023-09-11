@@ -23,7 +23,7 @@ export const BODY_TYPES = {
 /**
  * BodyType
  */
-export type BodyType = typeof BODY_TYPES[keyof typeof BODY_TYPES]
+export type BodyType = (typeof BODY_TYPES)[keyof typeof BODY_TYPES]
 
 /**
  * BODY_SLEEP_STATES
@@ -40,7 +40,7 @@ export const BODY_SLEEP_STATES = {
 /**
  * BodySleepState
  */
-export type BodySleepState = typeof BODY_SLEEP_STATES[keyof typeof BODY_SLEEP_STATES]
+export type BodySleepState = (typeof BODY_SLEEP_STATES)[keyof typeof BODY_SLEEP_STATES]
 
 export type BodyOptions = ConstructorParameters<typeof Body>[0]
 
@@ -131,7 +131,7 @@ export class Body extends EventTarget {
 
   /**
    * The collision group the body belongs to.
-   * @default 1
+   * @default -1
    */
   collisionFilterGroup: number
 
@@ -335,7 +335,7 @@ export class Body extends EventTarget {
     options: {
       /**
        * The collision group the body belongs to.
-       * @default 1
+       * @default -1
        */
       collisionFilterGroup?: number
       /**
@@ -434,7 +434,7 @@ export class Body extends EventTarget {
     this.world = null
     this.vlambda = new Vec3()
 
-    this.collisionFilterGroup = typeof options.collisionFilterGroup === 'number' ? options.collisionFilterGroup : 1
+    this.collisionFilterGroup = typeof options.collisionFilterGroup === 'number' ? options.collisionFilterGroup : -1
     this.collisionFilterMask = typeof options.collisionFilterMask === 'number' ? options.collisionFilterMask : -1
     this.collisionResponse = typeof options.collisionResponse === 'boolean' ? options.collisionResponse : true
     this.position = new Vec3()
