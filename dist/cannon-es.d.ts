@@ -152,7 +152,7 @@ declare module "shapes/Shape" {
         readonly CYLINDER: 128;
         readonly TRIMESH: 256;
     };
-    export type ShapeType = typeof SHAPE_TYPES[keyof typeof SHAPE_TYPES];
+    export type ShapeType = (typeof SHAPE_TYPES)[keyof typeof SHAPE_TYPES];
     export type ShapeOptions = ConstructorParameters<typeof Shape>[0];
     export class Shape {
         id: number;
@@ -987,13 +987,13 @@ declare module "objects/Body" {
         readonly STATIC: 2;
         readonly KINEMATIC: 4;
     };
-    export type BodyType = typeof BODY_TYPES[keyof typeof BODY_TYPES];
+    export type BodyType = (typeof BODY_TYPES)[keyof typeof BODY_TYPES];
     export const BODY_SLEEP_STATES: {
         readonly AWAKE: 0;
         readonly SLEEPY: 1;
         readonly SLEEPING: 2;
     };
-    export type BodySleepState = typeof BODY_SLEEP_STATES[keyof typeof BODY_SLEEP_STATES];
+    export type BodySleepState = (typeof BODY_SLEEP_STATES)[keyof typeof BODY_SLEEP_STATES];
     export type BodyOptions = ConstructorParameters<typeof Body>[0];
     export class Body extends EventTarget {
         static idCounter: number;

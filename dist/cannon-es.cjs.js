@@ -2005,7 +2005,7 @@ class Shape {
    */
 
   /**
-   * @default 1
+   * @default -1
    */
 
   /**
@@ -2032,7 +2032,7 @@ class Shape {
     this.type = options.type || 0;
     this.boundingSphereRadius = 0;
     this.collisionResponse = options.collisionResponse ? options.collisionResponse : true;
-    this.collisionFilterGroup = options.collisionFilterGroup !== undefined ? options.collisionFilterGroup : 1;
+    this.collisionFilterGroup = options.collisionFilterGroup !== undefined ? options.collisionFilterGroup : -1;
     this.collisionFilterMask = options.collisionFilterMask !== undefined ? options.collisionFilterMask : -1;
     this.material = options.material ? options.material : null;
     this.body = null;
@@ -3368,7 +3368,7 @@ class Body extends EventTarget {
     this.index = -1;
     this.world = null;
     this.vlambda = new Vec3();
-    this.collisionFilterGroup = typeof options.collisionFilterGroup === 'number' ? options.collisionFilterGroup : 1;
+    this.collisionFilterGroup = typeof options.collisionFilterGroup === 'number' ? options.collisionFilterGroup : -1;
     this.collisionFilterMask = typeof options.collisionFilterMask === 'number' ? options.collisionFilterMask : -1;
     this.collisionResponse = typeof options.collisionResponse === 'boolean' ? options.collisionResponse : true;
     this.position = new Vec3();
@@ -12119,7 +12119,7 @@ class World extends EventTarget {
    */
 
   /**
-   * Gravity to use when approximating the friction max force (mu*mass*gravity).
+   * Gravity to use when approximating the friction max force (mu \* mass \* gravity).
    * If undefined, global gravity will be used.
    * Use to enable friction in a World with a null gravity vector (no gravity).
    */
