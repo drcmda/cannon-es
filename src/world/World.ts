@@ -60,7 +60,7 @@ export class World extends EventTarget {
   /**
    * The wall-clock time since simulation start.
    */
-  wallClockTime: number
+  time: number
 
   /**
    * Time that has passed in the simulation.
@@ -217,7 +217,7 @@ export class World extends EventTarget {
     this.frictionEquations = []
     this.quatNormalizeSkip = options.quatNormalizeSkip !== undefined ? options.quatNormalizeSkip : 0
     this.quatNormalizeFast = options.quatNormalizeFast !== undefined ? options.quatNormalizeFast : false
-    this.wallClockTime = 0.0
+    this.time = 0.0
     this.simulationTime = 0.0
     this.stepnumber = 0
     this.default_dt = 1 / 60
@@ -489,14 +489,14 @@ export class World extends EventTarget {
       this.internalStep(dt)
 
       // Increment time
-      this.wallClockTime += dt
+      this.time += dt
       this.simulationTime += dt
     } else {
-      this.wallClockTime += timeSinceLastCalled
+      this.time += timeSinceLastCalled
 
       const t0 = performance.now()
       let substeps = 0
-      while (this.wallClockTime > this.simulationTime && substeps < maxSubSteps) {
+      while (this.time > this.simulationTime && substeps < maxSubSteps) {
         // Do fixed steps to catch up
         this.internalStep(dt)
         this.simulationTime += dt
@@ -509,17 +509,17 @@ export class World extends EventTarget {
         }
       }
 
-      if (this.wallClockTime > this.simulationTime) {
+      if (this.time > this.simulationTime) {
         // We could not catch up to the wall-clock time,
         // so in order to keep the ball rolling (:D),
         // we need to artificially catch up.
         // To the user's eye, this will look like the simulation
         // is running slower than expected.
-        const numberOfSteps = Math.ceil((this.wallClockTime - this.simulationTime) / dt)
+        const numberOfSteps = Math.ceil((this.time - this.simulationTime) / dt)
         this.simulationTime += numberOfSteps * dt
       }
 
-      const t = (this.wallClockTime - this.simulationTime) / dt + 1
+      const t = (this.time - this.simulationTime) / dt + 1
       for (let j = 0; j !== this.bodies.length; j++) {
         const b = this.bodies[j]
         b.previousPosition.lerp(b.position, t, b.interpolatedPosition)
