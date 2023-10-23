@@ -304,9 +304,10 @@ describe('World', () => {
     expect(body.previousPosition.y).toEqual(previousY)
 
     expect(world.stepnumber).toEqual(3)
-    expect(world.time).toEqual(3)
+    expect(world.simulationTime).toEqual(3)
 
-    const interpolationTime = (timeSinceLastCalled - world.time) / deltaTime + 1
+    // interpolationTime = (world.wallClockTime - world.simulationTime) / deltaTime + 1
+    const interpolationTime = (2.7 - 3) / deltaTime + 1
     expect(body.interpolatedPosition.y).toEqual(interpolationTime * (currentY - previousY) + previousY)
   })
 })

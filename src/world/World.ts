@@ -60,7 +60,12 @@ export class World extends EventTarget {
   /**
    * The wall-clock time since simulation start.
    */
-  time: number
+  wallClockTime: number
+
+  /**
+   * Time that has passed in the simulation.
+   */
+  simulationTime: number
 
   /**
    * Number of timesteps taken since start.
@@ -149,12 +154,6 @@ export class World extends EventTarget {
     narrowphase: number
   }
 
-  /**
-   * Time accumulator for interpolation.
-   * @see https://gafferongames.com/game-physics/fix-your-timestep/
-   */
-  accumulator: number
-
   subsystems: any[]
 
   /**
@@ -218,7 +217,8 @@ export class World extends EventTarget {
     this.frictionEquations = []
     this.quatNormalizeSkip = options.quatNormalizeSkip !== undefined ? options.quatNormalizeSkip : 0
     this.quatNormalizeFast = options.quatNormalizeFast !== undefined ? options.quatNormalizeFast : false
-    this.time = 0.0
+    this.wallClockTime = 0.0
+    this.simulationTime = 0.0
     this.stepnumber = 0
     this.default_dt = 1 / 60
     this.nextId = 0
@@ -258,7 +258,6 @@ export class World extends EventTarget {
       narrowphase: 0,
     }
 
-    this.accumulator = 0
     this.subsystems = []
     this.addBodyEvent = { type: 'addBody', body: null }
     this.removeBodyEvent = { type: 'removeBody', body: null }
@@ -368,7 +367,7 @@ export class World extends EventTarget {
     body.world = this
     body.initPosition.copy(body.position)
     body.initVelocity.copy(body.velocity)
-    body.timeLastSleepy = this.time
+    body.timeLastSleepy = this.simulationTime
     if (body instanceof Body) {
       body.initAngularVelocity.copy(body.angularVelocity)
       body.initQuaternion.copy(body.quaternion)
@@ -490,18 +489,17 @@ export class World extends EventTarget {
       this.internalStep(dt)
 
       // Increment time
-      this.time += dt
+      this.wallClockTime += dt
+      this.simulationTime += dt
     } else {
-      this.accumulator += timeSinceLastCalled
+      this.wallClockTime += timeSinceLastCalled
 
       const t0 = performance.now()
       let substeps = 0
-      while (this.accumulator > 0 && substeps < maxSubSteps) {
+      while (this.wallClockTime > this.simulationTime && substeps < maxSubSteps) {
         // Do fixed steps to catch up
         this.internalStep(dt)
-        this.accumulator -= dt
-        this.time += dt
-
+        this.simulationTime += dt
         substeps++
         if (performance.now() - t0 > dt * 1000) {
           // The framerate is not interactive anymore.
@@ -511,11 +509,17 @@ export class World extends EventTarget {
         }
       }
 
-      // Remove the excess accumulator, since we may not
-      // have had enough substeps available to catch up
-      this.accumulator = this.accumulator % dt
+      if (this.wallClockTime > this.simulationTime) {
+        // We could not catch up to the wall-clock time,
+        // so in order to keep the ball rolling (:D),
+        // we need to artificially catch up.
+        // To the user's eye, this will look like the simulation
+        // is running slower than expected.
+        const numberOfSteps = Math.ceil((this.wallClockTime - this.simulationTime) / dt)
+        this.simulationTime += numberOfSteps * dt
+      }
 
-      const t = this.accumulator / dt + 1
+      const t = (this.wallClockTime - this.simulationTime) / dt + 1
       for (let j = 0; j !== this.bodies.length; j++) {
         const b = this.bodies[j]
         b.previousPosition.lerp(b.position, t, b.interpolatedPosition)
@@ -859,7 +863,7 @@ export class World extends EventTarget {
       hasActiveBodies = false
       for (i = 0; i !== N; i++) {
         const bi = bodies[i]
-        bi.sleepTick(this.time)
+        bi.sleepTick(this.simulationTime)
 
         if (bi.sleepState !== Body.SLEEPING) {
           hasActiveBodies = true
