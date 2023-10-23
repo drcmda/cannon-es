@@ -496,10 +496,12 @@ export class World extends EventTarget {
 
       const t0 = performance.now()
       let substeps = 0
-      while (this.accumulator >= dt && substeps < maxSubSteps) {
+      while (this.accumulator > 0 && substeps < maxSubSteps) {
         // Do fixed steps to catch up
         this.internalStep(dt)
         this.accumulator -= dt
+        this.time += dt
+
         substeps++
         if (performance.now() - t0 > dt * 1000) {
           // The framerate is not interactive anymore.
@@ -513,14 +515,13 @@ export class World extends EventTarget {
       // have had enough substeps available to catch up
       this.accumulator = this.accumulator % dt
 
-      const t = this.accumulator / dt
+      const t = this.accumulator / dt + 1
       for (let j = 0; j !== this.bodies.length; j++) {
         const b = this.bodies[j]
         b.previousPosition.lerp(b.position, t, b.interpolatedPosition)
         b.previousQuaternion.slerp(b.quaternion, t, b.interpolatedQuaternion)
         b.previousQuaternion.normalize()
       }
-      this.time += timeSinceLastCalled
     }
   }
 
