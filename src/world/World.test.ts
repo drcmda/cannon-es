@@ -276,4 +276,38 @@ describe('World', () => {
     expect(world.gravity).toEqual(gravity)
     expect(world.frictionGravity).toEqual(frictionGravity)
   })
+
+  test('step: should interpolate correctly', () => {
+    // In case of interpolation, we need to ensure the world
+    // has simulated enough steps to cover the entire time that
+    // has passed, even when the timeSinceLastCalled + accumulator
+    // falls somewhere inbetween steps
+
+    const gravity = new Vec3(0, -1, 0) // Simplifies the calculation
+    const world = new World({ gravity })
+    const body = new Body({ type: Body.DYNAMIC, mass: 1 })
+    body.linearDamping = 0
+    body.angularDamping = 0
+
+    const deltaTime = 1
+    const timeSinceLastCalled = 2.7
+    world.addBody(body)
+    world.step(deltaTime, timeSinceLastCalled, 10)
+
+    // v = a * t
+    expect(body.velocity.y).toEqual(-3)
+
+    const currentY = -1 - 2 - 3
+    expect(body.position.y).toEqual(currentY)
+
+    const previousY = -1 - 2
+    expect(body.previousPosition.y).toEqual(previousY)
+
+    expect(world.stepnumber).toEqual(3)
+    expect(world.simulationTime).toEqual(3)
+
+    // interpolationTime = (world.wallClockTime - world.simulationTime) / deltaTime + 1
+    const interpolationTime = (2.7 - 3) / deltaTime + 1
+    expect(body.interpolatedPosition.y).toEqual(interpolationTime * (currentY - previousY) + previousY)
+  })
 })
