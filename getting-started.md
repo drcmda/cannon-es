@@ -153,3 +153,18 @@ animate()
 You should now see a falling ball on the screen! Check out the [basic three.js example](https://github.com/pmndrs/cannon-es/blob/master/examples/threejs.html) for the full code.
 
 That's it for the basic example, to learn more about all the different features, head over to the [examples page](https://pmndrs.github.io/cannon-es/)!
+
+## Supported Shape Collision Pairs
+
+Note that not all shapes can collide with each other as some collision algorithms are not implemented. The table below shows which shapes can currently collide with each other:
+
+|             | [Sphere](http://pmndrs.github.io/cannon-es/docs/classes/Sphere.html) | [Plane](http://pmndrs.github.io/cannon-es/docs/classes/Plane.html) | [Box](http://pmndrs.github.io/cannon-es/docs/classes/Box.html) | [Convex](http://pmndrs.github.io/cannon-es/docs/classes/ConvexPolyhedron.html) | [Particle](http://pmndrs.github.io/cannon-es/docs/classes/Particle.html) | [Heightfield](http://pmndrs.github.io/cannon-es/docs/classes/Heightfield.html) | [Trimesh](http://pmndrs.github.io/cannon-es/docs/classes/Trimesh.html) |
+| :-----------|:------:|:-----:|:---:|:------:|:--------:|:-----------:|:-------:|
+| Sphere      | Yes    | Yes   | Yes | Yes    | Yes      | Yes         | Yes     |
+| Plane       | -      | -     | Yes | Yes    | Yes      | -           | Yes     |
+| Box         | -      | -     | Yes | Yes    | Yes      | Yes         | (todo)  |
+| Cylinder    | -      | -     | Yes | Yes    | Yes      | Yes         | (todo)  |
+| Convex      | -      | -     | -   | Yes    | Yes      | Yes         | (todo)  |
+| Particle    | -      | -     | -   | -      | -        | (todo)      | (todo)  |
+| Heightfield | -      | -     | -   | -      | -        | -           | (todo)  |
+| Trimesh     | -      | -     | -   | -      | -        | -           | -       |
