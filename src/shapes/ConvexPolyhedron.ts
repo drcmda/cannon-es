@@ -536,7 +536,7 @@ export class ConvexPolyhedron extends Shape {
       let depth = planeNormalWS.dot(pVtxIn[i]) + planeEqWS // ???
 
       if (depth <= minDist) {
-        console.log(`clamped: depth=${depth} to minDist=${minDist}`)
+        // console.log(`clamped: depth=${depth} to minDist=${minDist}`)
         depth = minDist
       }
 
