@@ -44,4 +44,14 @@ export default [
       filesize(),
     ],
   },
+  {
+    input: './src/cannon-es',
+    output: {
+      file: 'dist/cannon-es.amd.js',
+      format: 'amd',
+      amd: {
+        id: 'cannon-es'
+      }
+    },
+  },
 ]
